@@ -1,0 +1,31 @@
+{
+    "name": "Laravel",
+    "image": "mcr.microsoft.com/devcontainers/php:8.2",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        },
+        "ghcr.io/devcontainers/features/sqlite3:1": {}
+    },
+    "forwardPorts": [8000, 5173],
+    "portsAttributes": {
+        "8000": {
+            "label": "Laravel App",
+            "onAutoForward": "openPreview"
+        },
+        "5173": {
+            "label": "Vite Dev Server",
+            "onAutoForward": "ignore"
+        }
+    },
+    "postCreateCommand": "composer install && npm install && cp .env.example .env && php artisan key:generate && php artisan migrate --seed",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "onecentlin.laravel-blade",
+                "amiralizadeh9480.laravel-extra-intellisense",
+                "shufo.vscode-blade-formatter"
+            ]
+        }
+    }
+}
