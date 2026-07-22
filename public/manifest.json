@@ -1,0 +1,18 @@
+{
+  "name": "Sistem Peminjaman Ruangan",
+  "short_name": "Pinjam Ruang",
+  "description": "Aplikasi Peminjaman Ruangan dan Pengaduan Keluhan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -31,14 +31,11 @@ class RoomResource extends Resource
                 ->required()
                 ->numeric()
                 ->minValue(1),
-            Forms\Components\TextInput::make('booking_quota')
-                ->label('Kuota Peminjaman Harian')
-                ->helperText('Jumlah maksimal peminjaman yang disetujui per hari. Kosongkan jika tidak ada batasan.')
-                ->numeric()
-                ->minValue(1)
-                ->nullable(),
             Forms\Components\Toggle::make('is_occupied')
                 ->label('Sedang Digunakan')
+                ->default(false),
+            Forms\Components\Toggle::make('is_cleaning')
+                ->label('Sedang Dibersihkan')
                 ->default(false),
             Forms\Components\Select::make('current_booking_id')
                 ->label('Peminjaman Aktif Saat Ini')
@@ -64,6 +61,7 @@ class RoomResource extends Resource
             Forms\Components\FileUpload::make('image_path')
                 ->label('Foto Ruangan')
                 ->image()
+                ->disk('public')
                 ->directory('rooms')
                 ->columnSpanFull(),
         ]);
@@ -84,12 +82,10 @@ class RoomResource extends Resource
                     ->label('Kapasitas')
                     ->suffix(' orang')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('booking_quota')
-                    ->label('Kuota Harian')
-                    ->placeholder('Tanpa Batas')
-                    ->sortable(),
                 Tables\Columns\ToggleColumn::make('is_occupied')
                     ->label('Sedang Digunakan'),
+                Tables\Columns\ToggleColumn::make('is_cleaning')
+                    ->label('Sedang Dibersihkan'),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Deskripsi')
                     ->limit(50),
@@ -100,11 +96,43 @@ class RoomResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->mountUsing(fn ($form) => $form->fill([
+                        'random_word' => collect(['HAPUS', 'KONFIRMASI', 'SETUJU', 'YAKIN', 'BENAR', 'BERSIHKAN', 'PERMANEN', 'MUTLAK', 'LANJUT', 'OKEY'])->random(),
+                    ]))
+                    ->form([
+                        Forms\Components\Hidden::make('random_word'),
+                        Forms\Components\TextInput::make('confirm_word')
+                            ->label(fn (Forms\Get $get) => "Ketik kata \"" . $get('random_word') . "\" untuk mengonfirmasi")
+                            ->required()
+                            ->rules([
+                                fn (Forms\Get $get) => function (string $attribute, $value, $fail) use ($get) {
+                                    if (strtoupper($value) !== $get('random_word')) {
+                                        $fail('Kata konfirmasi tidak cocok.');
+                                    }
+                                },
+                            ]),
+                    ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->mountUsing(fn ($form) => $form->fill([
+                            'random_word' => collect(['HAPUS', 'KONFIRMASI', 'SETUJU', 'YAKIN', 'BENAR', 'BERSIHKAN', 'PERMANEN', 'MUTLAK', 'LANJUT', 'OKEY'])->random(),
+                        ]))
+                        ->form([
+                            Forms\Components\Hidden::make('random_word'),
+                            Forms\Components\TextInput::make('confirm_word')
+                                ->label(fn (Forms\Get $get) => "Ketik kata \"" . $get('random_word') . "\" untuk mengonfirmasi")
+                                ->required()
+                                ->rules([
+                                    fn (Forms\Get $get) => function (string $attribute, $value, $fail) use ($get) {
+                                        if (strtoupper($value) !== $get('random_word')) {
+                                            $fail('Kata konfirmasi tidak cocok.');
+                                        }
+                                    },
+                                ]),
+                        ]),
                 ]),
             ]);
     }

@@ -18,6 +18,8 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+use Filament\Navigation\NavigationItem;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -27,12 +29,22 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->authGuard('admin')
+            ->authGuard('web')
             ->databaseNotifications()
+            ->renderHook(
+                'panels::body.end',
+                fn (): string => view('filament.parts.desktop-notifications'),
+            )
             ->colors([
                 'primary' => Color::Blue,
             ])
             ->brandName('Admin Ruangan')
+            ->navigationItems([
+                NavigationItem::make('Kembali ke Website')
+                    ->url('/')
+                    ->icon('heroicon-o-arrow-left-on-rectangle')
+                    ->sort(0),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

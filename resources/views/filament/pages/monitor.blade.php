@@ -47,6 +47,23 @@
         .room-card-monitor.occupied .room-name { color: #dc2626; }
         .dark .room-card-monitor.occupied .room-name { color: #f87171; }
 
+        .room-card-monitor.cleaning {
+            background: #fffbeb;
+            border-color: #d97706;
+            color: #78350f;
+        }
+        .dark .room-card-monitor.cleaning {
+            background: #1c1202;
+            border-color: #d97706;
+            color: #fbbf24;
+        }
+        .room-card-monitor.cleaning .status-badge {
+            background: #d97706;
+            color: white;
+        }
+        .room-card-monitor.cleaning .room-name { color: #d97706; }
+        .dark .room-card-monitor.cleaning .room-name { color: #fbbf24; }
+
         .room-name { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; }
         .room-capacity { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; }
 
@@ -90,23 +107,33 @@
         @php
             $nowTime = $now;
             $activeBooking = $room->bookings->first(function($b) use ($nowTime) {
-                return $b->start_time <= $nowTime && $b->end_time > $nowTime;
+                return $b->start_time <= $nowTime && $b->end_time > $nowTime && $b->status === 'approved';
             });
             $nextBooking = $room->bookings->first(function($b) use ($nowTime) {
                 return $b->start_time > $nowTime;
             });
             $isOccupied = $room->is_occupied || ($room->current_booking_id !== null) || ($activeBooking !== null);
+            $isCleaning = $room->is_cleaning;
+            $cardClass = $isCleaning ? 'cleaning' : ($isOccupied ? 'occupied' : 'available');
         @endphp
-        <div class="room-card-monitor {{ $isOccupied ? 'occupied' : 'available' }}">
+        <div class="room-card-monitor {{ $cardClass }}">
             <div class="room-name">{{ $room->name }}</div>
             <div class="room-capacity">👥 Kapasitas: {{ $room->capacity }} orang</div>
 
             <div class="status-badge">
-                {{ $isOccupied ? '🔴 SEDANG DIPAKAI' : '🟢 TERSEDIA' }}
+                @if($isCleaning)
+                    🟡 SEDANG DIBERSIHKAN
+                @else
+                    {{ $isOccupied ? '🔴 SEDANG DIPAKAI' : '🟢 TERSEDIA' }}
+                @endif
             </div>
 
             <div class="booking-info">
-                @if($isOccupied)
+                @if($isCleaning)
+                    <div class="info-row">
+                        <span class="value" style="color: #d97706; font-weight: bold;">Sedang dibersihkan oleh petugas</span>
+                    </div>
+                @elseif($isOccupied)
                     @if($room->currentBooking)
                         <div class="info-row">
                             <span class="value" style="color: #dc2626; font-weight: bold;">Set manual oleh admin</span>
@@ -148,7 +175,7 @@
                 @endif
             </div>
 
-            @if($nextBooking && !$isOccupied)
+            @if($nextBooking)
             <div class="next-booking">
                 <div class="next-label">⏰ Peminjaman Berikutnya</div>
                 <div class="next-info">{{ substr($nextBooking->start_time,0,5) }} – {{ substr($nextBooking->end_time,0,5) }} &bull; {{ $nextBooking->renter_name }}</div>

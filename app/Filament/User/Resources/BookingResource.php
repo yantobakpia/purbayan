@@ -25,16 +25,10 @@ class BookingResource extends Resource
                 Forms\Components\Select::make('room_id')
                     ->label('Ruangan')
                     ->relationship('room', 'name')
-                    ->required()
-                    ->live(),
+                    ->required(),
                 Forms\Components\TextInput::make('renter_name')
                     ->label('Nama Peminjam')
                     ->default(fn() => auth()->user()->name)
-                    ->required(),
-                Forms\Components\TextInput::make('renter_email')
-                    ->label('Email')
-                    ->default(fn() => auth()->user()->email)
-                    ->email()
                     ->required(),
                 Forms\Components\TextInput::make('renter_phone')
                     ->label('No. WhatsApp / Telepon')
@@ -45,54 +39,12 @@ class BookingResource extends Resource
                     ->minDate(now()->addDay()->startOfDay())
                     ->validationMessages([
                         'min_date' => 'Pemesanan maksimal dilakukan sehari sebelumnya (minimal untuk besok).',
-                    ])
-                    ->live()
-                    ->helperText(function (\Filament\Forms\Get $get, ?Booking $record) {
-                        $roomId = $get('room_id');
-                        $date = $get('date');
-                        if ($roomId && $date) {
-                            $room = \App\Models\Room::find($roomId);
-                            if ($room && $room->booking_quota !== null) {
-                                $count = Booking::where('room_id', $roomId)
-                                    ->whereDate('date', $date)
-                                    ->whereIn('status', ['approved', 'pending'])
-                                    ->where('id', '!=', $record?->id)
-                                    ->count();
-                                $remaining = max(0, $room->booking_quota - $count);
-                                return "Kuota harian: {$room->booking_quota} | Sisa kuota: {$remaining}";
-                            }
-                        }
-                        return null;
-                    })
-                    ->rules([
-                        function (\Filament\Forms\Get $get, ?Booking $record) {
-                            return function (string $attribute, $value, \Closure $fail) use ($get, $record) {
-                                $roomId = $get('room_id');
-                                $date = $value;
-
-                                if ($roomId && $date) {
-                                    $room = \App\Models\Room::find($roomId);
-                                    if ($room && $room->booking_quota !== null) {
-                                        $approvedCount = Booking::where('room_id', $roomId)
-                                            ->whereDate('date', $date)
-                                            ->whereIn('status', ['approved', 'pending'])
-                                            ->where('id', '!=', $record?->id)
-                                            ->count();
-                                        if ($approvedCount >= $room->booking_quota) {
-                                            $fail("Kuota peminjaman untuk ruangan {$room->name} pada tanggal tersebut sudah penuh atau sedang diajukan (Maksimal {$room->booking_quota} peminjaman).");
-                                        }
-                                    }
-                                }
-                            };
-                        },
                     ]),
                 Forms\Components\TimePicker::make('start_time')
                     ->label('Jam Mulai')
-                    ->seconds(false)
                     ->required(),
                 Forms\Components\TimePicker::make('end_time')
                     ->label('Jam Selesai')
-                    ->seconds(false)
                     ->required()
                     ->rules([
                         function (\Filament\Forms\Get $get, ?Booking $record) {
@@ -114,11 +66,22 @@ class BookingResource extends Resource
                     ->label('Keperluan / Tujuan')
                     ->columnSpanFull()
                     ->required(),
+                Forms\Components\FileUpload::make('permit_letter_path')
+                    ->label('Surat Permohonan (PDF)')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(5120) // 5 MB
+                    ->directory('permit_letters')
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('rejection_reason')
                     ->label('Alasan Penolakan')
                     ->columnSpanFull()
                     ->visible(fn ($get) => $get('status') === 'rejected')
                     ->disabled(),
+                Forms\Components\Textarea::make('admin_note')
+                    ->label('Catatan Admin')
+                    ->columnSpanFull()
+                    ->disabled()
+                    ->visible(fn ($record) => $record !== null),
                 Forms\Components\Hidden::make('user_id')
                     ->default(fn() => auth()->id()),
                 Forms\Components\Hidden::make('status')
@@ -134,31 +97,40 @@ class BookingResource extends Resource
                 Tables\Columns\TextColumn::make('date')->label('Tanggal')->date('d M Y')->sortable(),
                 Tables\Columns\TextColumn::make('start_time')->label('Mulai')->formatStateUsing(fn($state) => substr($state,0,5)),
                 Tables\Columns\TextColumn::make('end_time')->label('Selesai')->formatStateUsing(fn($state) => substr($state,0,5)),
+                Tables\Columns\TextColumn::make('permit_letter_path')
+                    ->label('Surat Permohonan')
+                    ->formatStateUsing(fn($state) => $state ? '📄 Lihat PDF' : '-')
+                    ->url(fn(Booking $record) => $record->permit_letter_path ? asset('storage/' . $record->permit_letter_path) : null)
+                    ->openUrlInNewTab(),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'approved',
                         'danger'  => 'rejected',
-                        'info'    => 'completed',
+                        'info'    => 'selesai',
                     ])
                     ->formatStateUsing(fn($state) => match($state) {
                         'pending'  => 'Pending',
                         'approved' => 'Disetujui',
                         'rejected' => 'Ditolak',
-                        'completed' => 'Selesai',
+                        'selesai' => 'Selesai',
                         default    => $state,
                     }),
                 Tables\Columns\TextColumn::make('rejection_reason')
                     ->label('Alasan Penolakan')
                     ->limit(30)
                     ->tooltip(fn (Booking $record): ?string => $record->rejection_reason),
+                Tables\Columns\TextColumn::make('admin_note')
+                    ->label('Catatan Admin')
+                    ->limit(30)
+                    ->tooltip(fn (Booking $record): ?string => $record->admin_note),
                 Tables\Columns\TextColumn::make('created_at')->label('Dikirim')->dateTime('d M Y H:i')->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options(['pending' => 'Pending', 'approved' => 'Disetujui', 'rejected' => 'Ditolak', 'completed' => 'Selesai']),
+                    ->options(['pending' => 'Pending', 'approved' => 'Disetujui', 'rejected' => 'Ditolak', 'selesai' => 'Selesai']),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

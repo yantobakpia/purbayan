@@ -1,0 +1,148 @@
+# Rencana Implementasi: Website Peminjaman Ruangan (Laravel + Filament)
+
+Project ini bertujuan untuk membuat sistem peminjaman ruangan yang mirip dengan parokibongsari.org/room menggunakan **Laravel 11** dan **Filament v3**.
+
+Sistem ini memiliki frontend publik yang modern untuk user, dashboard monitor untuk display ruangan, dan panel admin Filament untuk pengelolaan ruangan, persetujuan peminjaman, serta tindak lanjut keluhan.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Database SQLite**: Demi kemudahan setup tanpa konfigurasi server database tambahan, project ini akan menggunakan SQLite secara default. Database akan disimpan dalam file `database/database.sqlite` di dalam workspace Anda.
+>
+> **Layanan Monitor Display**: Monitor real-time akan diakses melalui route `/monitor` dengan tampilan Dark Mode premium yang dioptimalkan untuk TV/display eksternal, melakukan auto-refresh otomatis setiap 30 detik untuk memperbarui status peminjaman terkini.
+
+---
+
+## Proposed Changes
+
+Proyek akan dibangun dengan arsitektur Laravel standar dan Filament Admin Panel.
+
+### 1. Database & Models
+
+Kita akan mendefinisikan 3 tabel utama:
+
+#### Room (Ruangan)
+Tabel untuk mendata ruangan yang tersedia.
+- `id` (Primary Key)
+- `name` (string) - Nama ruangan (contoh: *Grha Argya Ballroom*)
+- `capacity` (integer) - Kapasitas ruangan
+- `description` (text, nullable) - Deskripsi ruangan
+- `image_path` (string, nullable) - Foto ruangan
+- `timestamps`
+
+#### Booking (Peminjaman)
+Tabel untuk mencatat peminjaman ruangan.
+- `id` (Primary Key)
+- `room_id` (foreignId -> rooms)
+- `renter_name` (string) - Nama peminjam
+- `renter_email` (string) - Email peminjam
+- `renter_phone` (string) - Nomor telepon/WhatsApp peminjam
+- `date` (date) - Tanggal peminjaman
+- `start_time` (time) - Jam mulai peminjaman
+- `end_time` (time) - Jam selesai peminjaman
+- `purpose` (text) - Keperluan/tujuan peminjaman
+- `status` (enum: `pending`, `approved`, `rejected`) - Status persetujuan (default `pending`)
+- `timestamps`
+
+#### Complaint (Keluhan)
+Tabel untuk menampung keluhan pengguna terkait fasilitas/ruangan.
+- `id` (Primary Key)
+- `name` (string) - Nama pelapor
+- `email_or_phone` (string) - Kontak pelapor
+- `complaint_text` (text) - Isi keluhan
+- `status` (enum: `pending`, `resolved`) - Status tindak lanjut (default `pending`)
+- `resolved_at` (timestamp, nullable) - Waktu penyelesaian keluhan
+- `timestamps`
+
+---
+
+### 2. Frontend User Interface (Rute Publik)
+
+#### Halaman Peminjaman Publik (`/` dan `/room`)
+Halaman landing page yang responsif dengan Vanilla CSS bertema premium (modern typography, soft gradients, clean cards):
+- **Daftar Ruangan**: Menampilkan card ruangan beserta kapasitas, deskripsi, dan foto ruangan.
+- **Formulir Peminjaman**: User dapat memilih ruangan, menentukan tanggal, mengisi detail kontak (nama, email, phone), jam peminjaman (mulai & selesai), serta keperluan.
+- **Kalender Jadwal / List Jadwal**: Menampilkan peminjaman yang berstatus `approved` agar pengguna dapat melihat kapan ruangan tersebut sedang dipakai, menghindari bentrok jadwal.
+- **Formulir Keluhan**: Form sederhana di bagian footer/halaman keluhan agar pengguna dapat mengirim feedback atau keluhan ruangan langsung ke admin.
+
+#### Halaman Monitor Lain (`/monitor`)
+Halaman khusus yang dirancang untuk layar TV atau monitor sekunder:
+- **Tampilan Dark Mode / Dashboard High-Contrast**: Layout grid besar yang menunjukkan status setiap ruangan hari ini secara real-time.
+- **Informasi Status**:
+  - Jika saat ini jam menunjukkan waktu di antara `start_time` dan `end_time` peminjaman yang `approved`: Menampilkan status **SEDANG DIPAKAI** (merah menyala/orange neon) beserta nama peminjam dan jam selesai (contoh: *Dipakai oleh: Pemuda Paroki s.d 17:00*).
+  - Jika tidak ada peminjaman aktif saat ini: Menampilkan status **KOSONG / TERSEDIA** (hijau neon).
+- **Auto-Refresh**: Menggunakan script Javascript sederhana untuk me-refresh data via Ajax atau reload halaman setiap 30 detik agar status selalu akurat.
+
+---
+
+### 3. Filament Admin Panel
+
+Kita akan membuat Resources berikut:
+
+#### `RoomResource`
+- Pengelolaan data ruangan (Tambah, Edit, Hapus, upload gambar).
+
+#### `BookingResource`
+- List peminjaman dengan filter berdasarkan status (`pending`, `approved`, `rejected`) dan tanggal.
+- Aksi persetujuan (**Accept / Approve** dan **Reject**) langsung dari baris tabel menggunakan Filament Actions.
+- Validasi otomatis: Admin tidak dapat menyetujui peminjaman jika terjadi bentrok jadwal (ruangan sama, tanggal sama, waktu beririsan) dengan peminjaman lain yang sudah `approved`.
+
+#### `ComplaintResource`
+- Daftar keluhan masuk.
+- Aksi **Mark as Resolved** untuk mengubah status keluhan menjadi `resolved`.
+
+#### Dashboard Custom Widget
+- Widget metrik: **Jumlah Ruangan yang Disewa Hari Ini** (menghitung peminjaman yang berstatus `approved` pada tanggal hari ini).
+
+---
+
+## Rencana Langkah Eksekusi
+
+### Langkah 1: Inisialisasi Project Laravel
+1. Jalankan `composer create-project laravel/laravel .` di direktori workspace.
+2. Setup file `.env` untuk menggunakan SQLite (`DB_CONNECTION=sqlite`).
+3. Jalankan `php artisan migrate` untuk inisialisasi tabel default.
+
+### Langkah 2: Instalasi & Setup Filament
+1. Install Filament v3 dengan `composer require filament/filament:"^3.2" -W`.
+2. Jalankan instalasi Filament panel: `php artisan filament:install --panels`.
+3. Buat admin user dengan `php artisan make:filament-user`.
+
+### Langkah 3: Database & Migrasi Ruangan, Peminjaman, Keluhan
+1. Buat model beserta file migrasi untuk `Room`, `Booking`, dan `Complaint`.
+2. Jalankan `php artisan migrate` untuk memperbarui skema database.
+3. Hubungkan model-model tersebut dengan relasi yang tepat (contoh: `Room hasMany Booking`).
+
+### Langkah 4: Pembuatan Filament Resources & Kustomisasi Dashboard
+1. Jalankan perintah pembuatan resource Filament:
+   - `php artisan make:filament-resource Room`
+   - `php artisan make:filament-resource Booking`
+   - `php artisan make:filament-resource Complaint`
+2. Konfigurasi form dan table pada masing-masing resource.
+3. Tambahkan Custom Action di `BookingResource` untuk mengubah status ke `approved` / `rejected`.
+4. Buat Filament widget `RoomsRentedToday` dan daftarkan pada dashboard admin.
+
+### Langkah 5: Pembuatan Frontend Publik & Form Peminjaman
+1. Buat controller `RoomController` untuk mengelola view frontend.
+2. Buat view `welcome.blade.php` dengan desain modern dan responsif menggunakan CSS premium.
+3. Tambahkan formulir peminjaman dengan validasi server-side (mencegah double booking jika waktu berbenturan).
+4. Tambahkan formulir keluhan di halaman publik yang langsung tersimpan ke database.
+
+### Langkah 6: Pembuatan Halaman Monitor (`/monitor`)
+1. Tambahkan rute `/monitor` dan view `monitor.blade.php`.
+2. Gunakan CSS bertema dark dashboard dengan tipografi besar agar mudah dibaca dari jarak jauh.
+3. Tulis JavaScript logic untuk menguji waktu sekarang terhadap waktu peminjaman hari ini dan mengganti status kelas CSS secara dinamis, serta melakukan reload/Ajax refresh.
+
+---
+
+## Verification Plan
+
+### Automated / Manual Verification
+1. **Pendaftaran Ruangan**: Masuk ke panel admin Filament, buat 3 ruangan contoh (contoh: *Loyola, VIP Roma, Ballroom*), lalu upload gambar.
+2. **Peminjaman User**: Buka halaman utama publik, buat peminjaman baru pada ruangan *Loyola* untuk tanggal hari ini pada slot waktu tertentu.
+3. **Persetujuan Admin**: Buka panel admin Filament -> Booking, verifikasi pengajuan peminjaman berstatus `pending`. Klik tombol **Accept/Acc**, pastikan status berubah menjadi `approved`.
+4. **Validasi Bentrok Jadwal**: Coba buat peminjaman baru pada ruangan dan waktu yang sama. Verifikasi sistem menolak / memberi peringatan bentrok.
+5. **Halaman Monitor**: Buka `/monitor`. Verifikasi ruangan *Loyola* berstatus **SEDANG DIPAKAI** dengan keterangan nama peminjam dan jam selesai, sementara ruangan lain berstatus **TERSEDIA**.
+6. **Pelaporan Keluhan**: Kirim keluhan melalui form di website. Cek panel admin Filament -> Complaints, pastikan keluhan muncul dan dapat diubah statusnya menjadi `resolved`.

@@ -18,6 +18,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+use Filament\Navigation\NavigationItem;
+
 class UserPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -33,10 +35,16 @@ class UserPanelProvider extends PanelProvider
                 'primary' => Color::Indigo,
             ])
             ->brandName('Peminjaman Ruangan')
+            ->navigationItems([
+                NavigationItem::make('Kembali ke Website')
+                    ->url('/')
+                    ->icon('heroicon-o-arrow-left-on-rectangle')
+                    ->sort(0),
+            ])
             ->discoverResources(in: app_path('Filament/User/Resources'), for: 'App\\Filament\\User\\Resources')
             ->discoverPages(in: app_path('Filament/User/Pages'), for: 'App\\Filament\\User\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\User\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/User/Widgets'), for: 'App\\Filament\\User\\Widgets')
             ->widgets([

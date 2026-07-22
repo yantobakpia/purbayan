@@ -8,7 +8,7 @@ class Register extends BaseRegister
 {
     protected function getRedirectUrl(): string
     {
-        return '/user';
+        return '/';
     }
 
     protected function handleRegistration(array $data): \Illuminate\Database\Eloquent\Model

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
-    protected $fillable = ['name', 'capacity', 'booking_quota', 'is_occupied', 'current_booking_id', 'description', 'image_path'];
+    protected $fillable = ['name', 'capacity', 'is_occupied', 'is_cleaning', 'current_booking_id', 'description', 'image_path'];
 
     protected $casts = [
         'is_occupied' => 'boolean',
-        'booking_quota' => 'integer',
+        'is_cleaning' => 'boolean',
     ];
 
     public function bookings(): HasMany
@@ -35,7 +35,7 @@ class Room extends Model
                 if ($oldBookingId) {
                     $booking = Booking::find($oldBookingId);
                     if ($booking && $booking->status === 'approved') {
-                        $booking->update(['status' => 'completed']);
+                        $booking->update(['status' => 'selesai']);
                     }
                 }
 
@@ -48,7 +48,7 @@ class Room extends Model
                     ->first();
 
                 if ($activeBooking) {
-                    $activeBooking->update(['status' => 'completed']);
+                    $activeBooking->update(['status' => 'selesai']);
                 }
 
                 $room->current_booking_id = null;
@@ -59,7 +59,7 @@ class Room extends Model
                 if ($oldBookingId && $oldBookingId != $room->current_booking_id) {
                     $booking = Booking::find($oldBookingId);
                     if ($booking && $booking->status === 'approved') {
-                        $booking->update(['status' => 'completed']);
+                        $booking->update(['status' => 'selesai']);
                     }
                 }
             }

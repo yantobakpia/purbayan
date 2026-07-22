@@ -18,7 +18,7 @@ class Monitor extends Page
     {
         $this->rooms = Room::with(['currentBooking', 'bookings' => function ($q) {
             $q->where('date', today())
-              ->where('status', 'approved')
+              ->whereIn('status', ['approved', 'checked_in'])
               ->orderBy('start_time');
         }])->get();
 

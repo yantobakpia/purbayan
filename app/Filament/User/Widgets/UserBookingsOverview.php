@@ -18,10 +18,6 @@ class UserBookingsOverview extends BaseWidget
         $rejected = Booking::where('user_id', $userId)->where('status', 'rejected')->count();
 
         return [
-            Stat::make('Password Anda', auth()->user()->plain_password ?? 'Tidak Tersedia')
-                ->description('Password akun Anda (plain text)')
-                ->descriptionIcon('heroicon-m-key')
-                ->color('warning'),
             Stat::make('Total Peminjaman', $total)
                 ->description('Semua pengajuan peminjaman Anda')
                 ->descriptionIcon('heroicon-m-calendar-days')
