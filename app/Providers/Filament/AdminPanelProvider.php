@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->passwordReset(\App\Filament\Pages\Auth\RequestPasswordReset::class)
+            ->profile(\App\Filament\Pages\Auth\EditProfile::class)
             ->authGuard('web')
             ->databaseNotifications()
             ->renderHook(
