@@ -35,6 +35,10 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('phone')
+                    ->label('No. HP / WhatsApp')
+                    ->tel()
+                    ->maxLength(255),
                 Forms\Components\TextInput::make('password')
                     ->label('Password Baru')
                     ->password()
@@ -56,6 +60,10 @@ class UserResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('No. HP / WhatsApp')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('role')

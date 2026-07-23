@@ -73,11 +73,15 @@ class AuthenticationTest extends TestCase
     {
         \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('user'));
 
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'phone' => '08123456789',
+        ]);
 
-        Livewire::test(\Filament\Pages\Auth\PasswordReset\RequestPasswordReset::class)
+        Livewire::test(\App\Filament\Pages\Auth\RequestPasswordReset::class)
             ->fillForm([
                 'email' => $user->email,
+                'phone' => '08123456789',
+                'new_password' => 'newpassword123',
             ])
             ->call('request')
             ->assertHasNoFormErrors();
