@@ -54,6 +54,40 @@ class RequestPasswordReset extends BaseRequestPasswordReset
             return;
         }
 
+        // Check password history (cannot reuse passwords from the last 3 months)
+        $threeMonthsAgo = now()->subMonths(3);
+        $recentPasswords = $user->passwordHistories()
+            ->where('created_at', '>=', $threeMonthsAgo)
+            ->pluck('password');
+
+        foreach ($recentPasswords as $oldPassword) {
+            if (Hash::check($data['new_password'], $oldPassword)) {
+                Notification::make()
+                    ->title('Password tidak boleh sama')
+                    ->body('Anda tidak boleh menggunakan password yang pernah digunakan dalam 3 bulan terakhir.')
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
+        // Also check current password
+        if (Hash::check($data['new_password'], $user->password)) {
+            Notification::make()
+                ->title('Password tidak boleh sama')
+                ->body('Password baru tidak boleh sama dengan password saat ini.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        // Save old password to history
+        $user->passwordHistories()->create([
+            'password' => $user->password,
+        ]);
+
         $user->password = Hash::make($data['new_password']);
         $user->save();
 

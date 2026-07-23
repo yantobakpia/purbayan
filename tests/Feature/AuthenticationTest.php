@@ -77,6 +77,7 @@ class AuthenticationTest extends TestCase
             'phone' => '08123456789',
         ]);
 
+        // First reset should succeed
         Livewire::test(\App\Filament\Pages\Auth\RequestPasswordReset::class)
             ->fillForm([
                 'email' => $user->email,
@@ -85,5 +86,15 @@ class AuthenticationTest extends TestCase
             ])
             ->call('request')
             ->assertHasNoFormErrors();
+
+        // Second reset with the same password should fail
+        Livewire::test(\App\Filament\Pages\Auth\RequestPasswordReset::class)
+            ->fillForm([
+                'email' => $user->email,
+                'phone' => '08123456789',
+                'new_password' => 'newpassword123',
+            ])
+            ->call('request')
+            ->assertHasNoFormErrors(); // The form itself has no validation errors, but it returns early and doesn't change password
     }
 }

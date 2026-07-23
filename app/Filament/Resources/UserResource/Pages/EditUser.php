@@ -38,7 +38,44 @@ class EditUser extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if (filled($data['password'] ?? null)) {
-            $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+            $newPassword = $data['password'];
+            $user = $this->record;
+
+            // Check password history (cannot reuse passwords from the last 3 months)
+            $threeMonthsAgo = now()->subMonths(3);
+            $recentPasswords = $user->passwordHistories()
+                ->where('created_at', '>=', $threeMonthsAgo)
+                ->pluck('password');
+
+            foreach ($recentPasswords as $oldPassword) {
+                if (\Illuminate\Support\Facades\Hash::check($newPassword, $oldPassword)) {
+                    \Filament\Notifications\Notification::make()
+                        ->title('Password tidak boleh sama')
+                        ->body('Anda tidak boleh menggunakan password yang pernah digunakan dalam 3 bulan terakhir.')
+                        ->danger()
+                        ->send();
+
+                    $this->halt();
+                }
+            }
+
+            // Also check current password
+            if (\Illuminate\Support\Facades\Hash::check($newPassword, $user->password)) {
+                \Filament\Notifications\Notification::make()
+                    ->title('Password tidak boleh sama')
+                    ->body('Password baru tidak boleh sama dengan password saat ini.')
+                    ->danger()
+                    ->send();
+
+                $this->halt();
+            }
+
+            // Save old password to history
+            $user->passwordHistories()->create([
+                'password' => $user->password,
+            ]);
+
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($newPassword);
         } else {
             unset($data['password']);
         }

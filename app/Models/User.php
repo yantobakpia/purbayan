@@ -36,4 +36,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function passwordHistories()
+    {
+        return $this->hasMany(PasswordHistory::class);
+    }
 }
