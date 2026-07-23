@@ -68,4 +68,18 @@ class AuthenticationTest extends TestCase
 
         $response->assertRedirect('/');
     }
+
+    public function test_user_can_request_password_reset()
+    {
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('user'));
+
+        $user = User::factory()->create();
+
+        Livewire::test(\Filament\Pages\Auth\PasswordReset\RequestPasswordReset::class)
+            ->fillForm([
+                'email' => $user->email,
+            ])
+            ->call('request')
+            ->assertHasNoFormErrors();
+    }
 }
