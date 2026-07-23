@@ -14,6 +14,11 @@ Route::post('/book', [RoomController::class, 'book'])->name('book')->middleware(
 Route::post('/complaint', [RoomController::class, 'complaint'])->name('complaint')->middleware('throttle:5,1');
 Route::post('/bookings/{booking}/cancel', [RoomController::class, 'cancelBooking'])->name('bookings.cancel');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/user/profile', [RoomController::class, 'profilePage'])->name('profile.page');
+    Route::post('/user/profile', [RoomController::class, 'updateProfile'])->name('profile.update');
+});
+
 Route::get('/admin/unread-notifications', [RoomController::class, 'unreadNotifications'])
     ->name('admin.unread-notifications');
 

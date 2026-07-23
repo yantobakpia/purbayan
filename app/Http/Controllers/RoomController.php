@@ -327,4 +327,59 @@ class RoomController extends Controller
             'body' => $n->data['body'] ?? '',
         ]));
     }
+
+    public function profilePage()
+    {
+        return view('profile');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'required|string|regex:/^(08|\+62|62)[0-9]{7,13}$/',
+            'password' => 'nullable|string|min:4|confirmed',
+        ], [
+            'phone.regex' => 'Format nomor HP tidak valid. Gunakan format seperti 08123456789 atau +628123456789.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+        ]);
+
+        if (filled($request->password)) {
+            $newPassword = $request->password;
+
+            // Check password history (cannot reuse passwords from the last 3 months)
+            $threeMonthsAgo = now()->subMonths(3);
+            $recentPasswords = $user->passwordHistories()
+                ->where('created_at', '>=', $threeMonthsAgo)
+                ->pluck('password');
+
+            foreach ($recentPasswords as $oldPassword) {
+                if (\Illuminate\Support\Facades\Hash::check($newPassword, $oldPassword)) {
+                    return back()->withErrors(['password' => 'Anda tidak boleh menggunakan password yang pernah digunakan dalam 3 bulan terakhir.'])->withInput();
+                }
+            }
+
+            // Also check current password
+            if (\Illuminate\Support\Facades\Hash::check($newPassword, $user->password)) {
+                return back()->withErrors(['password' => 'Password baru tidak boleh sama dengan password saat ini.'])->withInput();
+            }
+
+            // Save old password to history
+            $user->passwordHistories()->create([
+                'password' => $user->password,
+            ]);
+
+            $user->password = \Illuminate\Support\Facades\Hash::make($newPassword);
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'];
+        $user->save();
+
+        return back()->with('success', 'Profil Anda berhasil diperbarui.');
+    }
 }
