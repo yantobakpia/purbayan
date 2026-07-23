@@ -29,6 +29,7 @@ class UserPanelProvider extends PanelProvider
             ->path('user')
             ->login(\App\Filament\User\Pages\Auth\Login::class)
             ->registration(\App\Filament\User\Pages\Auth\Register::class)
+            ->passwordReset()
             ->authGuard('web')
             ->databaseNotifications()
             ->colors([
