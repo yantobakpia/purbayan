@@ -243,6 +243,7 @@
     <a href="{{ route('peminjaman.page') }}" class="active">Pesan Ruangan</a>
     <a href="{{ route('complaint.page') }}">Keluhan</a>
     @auth
+        <a href="/user/profile">Profil Saya</a>
         @if(auth()->user()->is_admin || auth()->user()->email === 'admin@ruangan.com')
             <a href="/admin" style="color: var(--danger-text); background: var(--danger-bg); font-weight: 700;">Dashboard Admin</a>
         @endif
