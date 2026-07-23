@@ -303,10 +303,7 @@
                         <label for="renter_name">Nama Peminjam</label>
                         <input type="text" name="renter_name" id="renter_name" value="{{ old('renter_name', auth()->user()->name) }}" placeholder="Nama lengkap" required>
                     </div>
-                    <div class="form-group">
-                        <label for="renter_phone">No. WhatsApp / Telepon</label>
-                        <input type="text" name="renter_phone" id="renter_phone" value="{{ old('renter_phone') }}" placeholder="08xxxxxxxxxx" required>
-                    </div>
+                    <input type="hidden" name="renter_phone" value="{{ auth()->user()->phone ?? '08123456789' }}">
                     <div class="form-group full">
                         <label for="permit_letter">Surat Permohonan (Opsional, PDF, Maksimal 5 MB)</label>
                         <input type="file" name="permit_letter" id="permit_letter" accept="application/pdf" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px;">

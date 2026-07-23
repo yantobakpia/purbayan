@@ -266,14 +266,11 @@
         <form method="POST" action="{{ route('complaint') }}" enctype="multipart/form-data">
             @csrf
             <div class="form-grid">
-                <div class="form-group">
+                <div class="form-group full">
                     <label for="c_name">Nama</label>
                     <input type="text" name="name" id="c_name" value="{{ auth()->check() ? auth()->user()->name : '' }}" placeholder="Nama Anda" required>
                 </div>
-                <div class="form-group">
-                    <label for="c_contact">No. HP</label>
-                    <input type="tel" name="email_or_phone" id="c_contact" value="{{ old('email_or_phone') }}" placeholder="No. HP Anda (contoh: 08123456789)" pattern="^(08|\+62|62)[0-9]{7,13}$" title="Format nomor HP tidak valid. Gunakan format seperti 08123456789 atau +628123456789." required>
-                </div>
+                <input type="hidden" name="email_or_phone" value="{{ auth()->check() ? (auth()->user()->phone ?? '08123456789') : '08123456789' }}">
                 <div class="form-group full">
                     <label for="c_room">Ruangan (Opsional)</label>
                     <select name="room_id" id="c_room">

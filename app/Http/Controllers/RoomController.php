@@ -110,6 +110,11 @@ class RoomController extends Controller
             return redirect()->route('filament.user.auth.login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Automatically set renter_phone from authenticated user's phone
+        $request->merge([
+            'renter_phone' => auth()->user()->phone ?? '08123456789',
+        ]);
+
         $rules = [
             'room_id'         => 'required|exists:rooms,id',
             'renter_name'     => 'required|string|max:255',
@@ -219,6 +224,17 @@ class RoomController extends Controller
 
     public function complaint(Request $request)
     {
+        // Automatically set email_or_phone from authenticated user's phone if logged in
+        if (auth()->check()) {
+            $request->merge([
+                'email_or_phone' => auth()->user()->phone ?? '08123456789',
+            ]);
+        } else {
+            $request->merge([
+                'email_or_phone' => '08123456789',
+            ]);
+        }
+
         $validated = $request->validate([
             'room_id'        => ['nullable', 'exists:rooms,id'],
             'name'           => ['required', 'string', 'max:255'],
