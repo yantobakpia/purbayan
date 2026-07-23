@@ -236,8 +236,6 @@
     @auth
         @if(auth()->user()->is_admin || auth()->user()->email === 'admin@ruangan.com')
             <a href="/admin" style="color: var(--danger-text); background: var(--danger-bg); font-weight: 700;">Dashboard Admin</a>
-        @else
-            <a href="/user" style="color: var(--primary); background: var(--primary-light); font-weight: 700;">Dashboard Saya</a>
         @endif
         <form action="{{ route('filament.user.auth.logout') }}" method="POST" style="display: inline;">
             @csrf
