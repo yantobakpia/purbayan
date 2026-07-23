@@ -27,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Hash::extend('md5', function () {
+            return new \App\Services\Md5Hasher();
+        });
+
+        config(['hashing.driver' => 'md5']);
     }
 }

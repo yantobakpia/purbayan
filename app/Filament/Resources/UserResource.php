@@ -66,11 +66,6 @@ class UserResource extends Resource
                         'danger' => 'Admin',
                         'success' => 'User',
                     ]),
-                Tables\Columns\TextColumn::make('plain_password')
-                    ->label('Password')
-                    ->searchable()
-                    ->copyable()
-                    ->placeholder('-'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Terdaftar')
                     ->dateTime('d M Y H:i')

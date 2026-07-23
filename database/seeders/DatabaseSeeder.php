@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             'name'  => 'Admin',
             'email' => 'admin@ruangan.com',
             'is_admin' => true,
-            'plain_password' => 'password',
         ]);
 
         $this->call(RoomSeeder::class);

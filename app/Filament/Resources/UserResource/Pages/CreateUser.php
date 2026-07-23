@@ -13,8 +13,7 @@ class CreateUser extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if (filled($data['password'] ?? null)) {
-            $data['plain_password'] = $data['password'];
-            $data['password'] = bcrypt($data['password']);
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
         }
         return $data;
     }
