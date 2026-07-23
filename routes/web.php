@@ -10,8 +10,8 @@ Route::get('/check-status', [RoomController::class, 'checkStatus'])->name('check
 Route::get('/jadwal', [RoomController::class, 'jadwalPage'])->name('jadwal.page');
 Route::get('/peminjaman', [RoomController::class, 'peminjamanPage'])->name('peminjaman.page');
 Route::get('/keluhan', [RoomController::class, 'complaintPage'])->name('complaint.page');
-Route::post('/book', [RoomController::class, 'book'])->name('book');
-Route::post('/complaint', [RoomController::class, 'complaint'])->name('complaint');
+Route::post('/book', [RoomController::class, 'book'])->name('book')->middleware('throttle:10,1');
+Route::post('/complaint', [RoomController::class, 'complaint'])->name('complaint')->middleware('throttle:5,1');
 Route::post('/bookings/{booking}/cancel', [RoomController::class, 'cancelBooking'])->name('bookings.cancel');
 
 Route::get('/admin/unread-notifications', [RoomController::class, 'unreadNotifications'])
