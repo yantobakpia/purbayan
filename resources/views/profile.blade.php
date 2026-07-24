@@ -130,6 +130,40 @@
         .alert-success { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
         .alert-danger  { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
 
+        .profile-header-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+        }
+        .profile-info h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+        .profile-info p {
+            font-size: 0.95rem;
+            color: #bfdbfe;
+        }
+
         .form-card { 
             background: var(--card); 
             border-radius: var(--radius-lg); 
@@ -139,23 +173,25 @@
             margin-bottom: 2.5rem; 
         }
 
-        .form-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
         .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+        .form-group.full-width { grid-column: span 2; }
         
-        label { font-weight: 700; font-size: 0.875rem; color: #334155; }
+        label { font-weight: 700; font-size: 0.875rem; color: #475569; }
         input { 
             border: 1.5px solid var(--border); 
             border-radius: var(--radius-md); 
-            padding: 0.7rem 1rem; 
+            padding: 0.75rem 1rem; 
             font-size: 0.95rem; 
             font-family: inherit; 
             transition: all 0.2s; 
-            background: white; 
+            background: #f8fafc; 
             color: var(--text);
         }
         input:focus { 
             outline: none; 
             border-color: var(--primary); 
+            background: white;
             box-shadow: 0 0 0 4px rgba(37,99,235,0.1); 
         }
         
@@ -183,7 +219,10 @@
             .hero-title { font-size: 1.85rem; }
             .hero-subtitle { font-size: 0.95rem; margin-bottom: 1.5rem; }
             .container { padding: 1.5rem 1rem; }
+            .profile-header-card { flex-direction: column; text-align: center; padding: 1.5rem; gap: 1rem; }
             .form-card { padding: 1.25rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+            .form-group.full-width { grid-column: span 1; }
             .table-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             .section-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
         }
@@ -240,6 +279,16 @@
         </div>
     @endif
 
+    <div class="profile-header-card">
+        <div class="profile-avatar">
+            {{ substr(auth()->user()->name, 0, 2) }}
+        </div>
+        <div class="profile-info">
+            <h2>{{ auth()->user()->name }}</h2>
+            <p>{{ auth()->user()->email }}</p>
+        </div>
+    </div>
+
     <div class="form-card">
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
@@ -252,11 +301,13 @@
                     <label for="email">Email</label>
                     <input type="email" name="email" id="email" value="{{ old('email', auth()->user()->email) }}" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group full-width">
                     <label for="phone">No. HP / WhatsApp</label>
                     <input type="tel" name="phone" id="phone" value="{{ old('phone', auth()->user()->phone) }}" placeholder="Contoh: 08123456789" required>
                 </div>
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 1rem 0;">
+                <div class="form-group full-width" style="margin: 0.5rem 0;">
+                    <hr style="border: 0; border-top: 1px solid var(--border);">
+                </div>
                 <div class="form-group">
                     <label for="password">Password Baru (Kosongkan jika tidak ingin diubah)</label>
                     <input type="password" name="password" id="password" placeholder="Minimal 4 karakter">
@@ -266,7 +317,7 @@
                     <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Ulangi password baru">
                 </div>
             </div>
-            <div style="margin-top: 1.5rem;">
+            <div style="margin-top: 2rem;">
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Perubahan</button>
             </div>
         </form>
