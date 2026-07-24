@@ -42,6 +42,10 @@
             transition: all 0.3s ease;
             margin: 2rem 0 1rem 0 !important;
         }
+        .dark .fi-simple-main {
+            background: rgba(24, 24, 27, 0.95) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
         @media (max-width: 640px) {
             .fi-simple-main {
                 padding: 2rem 1.5rem !important;
@@ -54,10 +58,28 @@
             border: 1.5px solid #e2e8f0 !important;
             padding: 0.75rem 1rem !important;
             transition: all 0.2s ease !important;
+            background-color: white !important;
+            color: #0f172a !important;
+        }
+        .dark .fi-simple-main input {
+            border-color: #3f3f46 !important;
+            background-color: #18181b !important;
+            color: white !important;
         }
         .fi-simple-main input:focus {
             border-color: #2563eb !important;
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+        }
+        /* Style the labels */
+        .fi-simple-main label,
+        .fi-simple-main .fi-fo-field-wrp-label,
+        .fi-simple-main span {
+            color: #334155 !important;
+        }
+        .dark .fi-simple-main label,
+        .dark .fi-simple-main .fi-fo-field-wrp-label,
+        .dark .fi-simple-main span {
+            color: #e2e8f0 !important;
         }
         /* Style the primary buttons */
         .fi-simple-main button[type="submit"], 
@@ -68,6 +90,7 @@
             font-weight: 700 !important;
             transition: all 0.2s ease !important;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+            color: white !important;
         }
         .fi-simple-main button[type="submit"]:hover,
         .fi-simple-main .fi-btn-color-primary:hover {
@@ -96,9 +119,15 @@
             letter-spacing: -0.025em !important;
             color: #0f172a !important;
         }
+        .dark .fi-simple-header-heading {
+            color: white !important;
+        }
         .fi-simple-header-subheading {
             color: #475569 !important;
             font-weight: 500 !important;
+        }
+        .dark .fi-simple-header-subheading {
+            color: #94a3b8 !important;
         }
         /* Back to home button */
         .back-to-home {
