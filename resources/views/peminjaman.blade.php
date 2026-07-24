@@ -227,6 +227,9 @@
             font-size: 0.8rem; 
             font-weight: 700; 
         }
+        .status-available { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+        .status-occupied { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); }
+        .status-cleaning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid var(--warning-border); }
 
         .back-link { display: block; text-align: center; margin-top: 1.5rem; color: var(--primary); text-decoration: none; font-weight: 600; }
         .back-link:hover { text-decoration: underline; }
