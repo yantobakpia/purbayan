@@ -33,8 +33,15 @@ class UserPanelProvider extends PanelProvider
             ->profile(\App\Filament\Pages\Auth\EditProfile::class)
             ->authGuard('web')
             ->databaseNotifications()
+            ->font('Plus Jakarta Sans')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
+                'danger' => Color::Rose,
+                'gray' => Color::Gray,
+                'info' => Color::Blue,
                 'primary' => Color::Indigo,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
             ->brandName('Peminjaman Ruangan')
             ->navigationItems([

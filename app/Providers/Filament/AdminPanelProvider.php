@@ -37,8 +37,15 @@ class AdminPanelProvider extends PanelProvider
                 'panels::body.end',
                 fn (): string => view('filament.parts.desktop-notifications'),
             )
+            ->font('Plus Jakarta Sans')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
-                'primary' => Color::Blue,
+                'danger' => Color::Rose,
+                'gray' => Color::Gray,
+                'info' => Color::Blue,
+                'primary' => Color::Indigo,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
             ->brandName('Admin Ruangan')
             ->navigationItems([
@@ -55,7 +62,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
