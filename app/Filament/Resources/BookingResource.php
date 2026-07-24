@@ -17,6 +17,7 @@ class BookingResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationLabel = 'Peminjaman';
     protected static ?string $modelLabel = 'Peminjaman';
+    protected static ?string $pluralModelLabel = 'Peminjaman';
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
