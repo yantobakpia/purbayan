@@ -340,7 +340,7 @@ class RoomController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone' => 'required|string|regex:/^(08|\+62|62)[0-9]{7,13}$/',
+            'phone' => ['required', 'string', 'regex:/^(08|\+62|62)[0-9]{7,13}$/'],
             'password' => 'nullable|string|min:4|confirmed',
         ], [
             'phone.regex' => 'Format nomor HP tidak valid. Gunakan format seperti 08123456789 atau +628123456789.',
