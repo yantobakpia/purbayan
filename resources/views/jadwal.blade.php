@@ -63,15 +63,33 @@
         nav { 
             background: var(--card); 
             border-bottom: 1px solid var(--border); 
-            padding: 0.75rem 1.5rem; 
+            padding: 0.75rem 1rem; 
             display: flex; 
-            justify-content: center; 
-            gap: 0.5rem; 
+            justify-content: flex-start; 
+            gap: 0.35rem; 
             position: sticky; 
             top: 0; 
             z-index: 100; 
             box-shadow: var(--shadow-sm);
-            flex-wrap: wrap;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        nav::-webkit-scrollbar {
+            display: none;
+        }
+        nav {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        nav a, nav button, nav form {
+            flex-shrink: 0;
+        }
+        @media (min-width: 769px) {
+            nav {
+                justify-content: center;
+                gap: 0.5rem;
+            }
         }
         nav a, nav button { 
             color: #475569; 
@@ -445,6 +463,20 @@
             padding: 0.75rem;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding: 2.5rem 1rem 3rem 1rem; }
+            .hero-title { font-size: 1.85rem; }
+            .hero-subtitle { font-size: 0.95rem; margin-bottom: 1.5rem; }
+            .container { padding: 1.5rem 1rem; }
+            .rooms-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+            .table-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .calendar-grid { gap: 0.2rem; }
+            .cal-day-cell { padding: 0.4rem 0.1rem; font-size: 0.75rem; }
+            .cal-head { font-size: 0.65rem; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+            .calendar-filter-bar { width: 100%; justify-content: flex-start; }
         }
     </style>
 </head>
