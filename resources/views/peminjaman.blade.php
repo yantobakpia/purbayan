@@ -373,65 +373,73 @@
             @if($myBookings->isEmpty())
                 <p style="color: var(--muted); margin-bottom: 2rem;">Anda belum memiliki riwayat peminjaman.</p>
             @else
-                <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;">
-                    <table class="schedule-table" style="margin-bottom: 0;">
-                        <thead>
-                            <tr>
-                                <th>Ruangan</th>
-                                <th>Tanggal</th>
-                                <th>Jam</th>
-                                <th>Surat</th>
-                                <th>Catatan Admin</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($myBookings as $b)
+                <div class="table-card">
+                    <div style="overflow-x: auto;">
+                        <table class="schedule-table" style="margin-bottom: 0;">
+                            <thead>
                                 <tr>
-                                    <td><strong>{{ $b->room->name }}</strong></td>
-                                    <td>{{ $b->date->format('d M Y') }}</td>
-                                    <td>{{ substr($b->start_time, 0, 5) }} - {{ substr($b->end_time, 0, 5) }}</td>
-                                    <td>
-                                        @if($b->permit_letter_path)
-                                            <a href="{{ asset('storage/' . $b->permit_letter_path) }}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">📄 PDF</a>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>{{ $b->admin_note ?? '-' }}</td>
-                                    <td>
-                                        @if($b->status === 'pending')
-                                            <span class="badge" style="background: #fef3c7; color: #d97706; border: 1px solid #fcd34d;">Pending</span>
-                                        @elseif($b->status === 'approved')
-                                            <span class="badge" style="background: #dcfce7; color: #15803d; border: 1px solid #86efac;">Disetujui</span>
-                                        @elseif($b->status === 'rejected')
-                                            <span class="badge" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;" title="Alasan: {{ $b->rejection_reason }}">Ditolak</span>
-                                        @elseif($b->status === 'selesai')
-                                            <span class="badge" style="background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db;">Selesai</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($b->status === 'pending')
-                                            <form action="{{ route('bookings.cancel', $b->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan peminjaman ini?');" style="display: inline;">
-                                                @csrf
-                                                <button type="submit" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Batalkan</button>
-                                            </form>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
+                                    <th>Ruangan</th>
+                                    <th>Tanggal</th>
+                                    <th>Jam</th>
+                                    <th>Surat</th>
+                                    <th>Catatan Admin</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
                                 </tr>
-                                @if($b->status === 'rejected' && $b->rejection_reason)
-                                    <tr style="background: #fffbeb;">
-                                        <td colspan="6" style="padding: 0.5rem 1rem; font-size: 0.85rem; color: #b45309;">
-                                            <strong>Alasan Penolakan:</strong> {{ $b->rejection_reason }}
+                            </thead>
+                            <tbody>
+                                @foreach($myBookings as $b)
+                                    <tr>
+                                        <td><strong>{{ $b->room->name }}</strong></td>
+                                        <td>{{ $b->date->format('d M Y') }}</td>
+                                        <td><span class="time-pill">{{ substr($b->start_time, 0, 5) }} - {{ substr($b->end_time, 0, 5) }}</span></td>
+                                        <td>
+                                            @if($b->permit_letter_path)
+                                                <a href="{{ asset('storage/' . $b->permit_letter_path) }}" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">📄 PDF</a>
+                                            @else
+                                                <span style="color: var(--muted);">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($b->admin_note)
+                                                <span style="font-size: 0.9rem; color: var(--text);">{{ $b->admin_note }}</span>
+                                            @else
+                                                <span style="color: var(--muted);">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($b->status === 'pending')
+                                                <span class="badge-status status-cleaning" style="margin-bottom: 0;">Pending</span>
+                                            @elseif($b->status === 'approved')
+                                                <span class="badge-status status-available" style="margin-bottom: 0;">Disetujui</span>
+                                            @elseif($b->status === 'rejected')
+                                                <span class="badge-status status-occupied" style="margin-bottom: 0;" title="Alasan: {{ $b->rejection_reason }}">Ditolak</span>
+                                            @elseif($b->status === 'selesai')
+                                                <span class="badge-status" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; margin-bottom: 0;">Selesai</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($b->status === 'pending')
+                                                <form action="{{ route('bookings.cancel', $b->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan peminjaman ini?');" style="display: inline;">
+                                                    @csrf
+                                                    <button type="submit" class="cal-btn" style="background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-border); padding: 0.35rem 0.75rem; font-size: 0.8rem;">Batalkan</button>
+                                                </form>
+                                            @else
+                                                <span style="color: var(--muted);">-</span>
+                                            @endif
                                         </td>
                                     </tr>
-                                @endif
-                            @endforeach
-                        </tbody>
-                    </table>
+                                    @if($b->status === 'rejected' && $b->rejection_reason)
+                                        <tr style="background: var(--danger-bg);">
+                                            <td colspan="7" style="padding: 0.75rem 1.25rem; font-size: 0.85rem; color: var(--danger-text); border-bottom: 1px solid var(--danger-border);">
+                                                <strong>Alasan Penolakan:</strong> {{ $b->rejection_reason }}
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             @endif
         </div>
