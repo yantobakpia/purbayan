@@ -13,8 +13,24 @@
         const banner = document.getElementById('desktop-notification-banner');
         const btn = document.getElementById('enable-desktop-notifications-btn');
 
+        // Kalau Web Push (PWA) aktif di perangkat ini, notifikasi sudah dikirim
+        // oleh service worker. Polling di bawah tidak boleh menampilkannya lagi.
+        let hasPushSubscription = false;
+
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.ready
+                .then(reg => reg.pushManager.getSubscription())
+                .then(subscription => {
+                    hasPushSubscription = !!subscription;
+                    if (hasPushSubscription) {
+                        banner.style.display = 'none';
+                    }
+                })
+                .catch(() => {});
+        }
+
         function updateBannerVisibility() {
-            if (Notification.permission === "default") {
+            if (Notification.permission === "default" && !hasPushSubscription) {
                 banner.style.display = 'flex';
             } else {
                 banner.style.display = 'none';
@@ -82,7 +98,7 @@
                             hasNew = true;
                             newShown.push(notification.id);
 
-                            if (Notification.permission === "granted") {
+                            if (Notification.permission === "granted" && !hasPushSubscription) {
                                 const options = {
                                     body: notification.body,
                                     icon: '/favicon.ico',

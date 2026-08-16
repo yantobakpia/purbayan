@@ -1,18 +1,104 @@
 {
+  "id": "/",
   "name": "Sistem Peminjaman Ruangan",
   "short_name": "Pinjam Ruang",
   "description": "Aplikasi Peminjaman Ruangan dan Pengaduan Keluhan",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",
   "orientation": "portrait-primary",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["productivity", "business"],
   "icons": [
+    {
+      "src": "/icons/icon-96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "type": "image/png",
+      "sizes": "152x152",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-256.png",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "type": "image/png",
+      "sizes": "384x384",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
     {
       "src": "/icon.svg",
       "type": "image/svg+xml",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pesan Ruangan",
+      "short_name": "Pesan",
+      "url": "/peminjaman",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Jadwal Peminjaman",
+      "short_name": "Jadwal",
+      "url": "/jadwal",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Kirim Keluhan",
+      "short_name": "Keluhan",
+      "url": "/keluhan",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

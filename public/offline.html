@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidak Ada Koneksi - Pinjam Ruang</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="theme-color" content="#2563eb">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+            text-align: center;
+        }
+
+        .card {
+            max-width: 420px;
+            width: 100%;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 40px 28px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+        }
+
+        .icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #eff6ff;
+            font-size: 32px;
+        }
+
+        h1 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+
+        p { color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            border: 0;
+            border-radius: 10px;
+            background: #2563eb;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #0f172a; color: #f1f5f9; }
+            .card { background: #1e293b; border-color: #334155; }
+            .icon { background: #1e3a8a; }
+            p { color: #94a3b8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">📡</div>
+        <h1>Tidak Ada Koneksi</h1>
+        <p>
+            Halaman ini butuh koneksi internet. Periksa jaringan Anda,
+            lalu coba muat ulang. Notifikasi tetap akan masuk begitu perangkat kembali online.
+        </p>
+        <button type="button" onclick="location.reload()">Coba Lagi</button>
+    </div>
+
+    <script>
+        window.addEventListener('online', function () { location.reload(); });
+    </script>
+</body>
+</html>
