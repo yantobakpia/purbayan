@@ -29,24 +29,42 @@ class Booking extends Model
             // Kirim notifikasi ke admin
             $admins = User::where('is_admin', true)->orWhere('email', 'admin@ruangan.com')->get();
             if ($admins->isNotEmpty()) {
+                $adminBody = "{$booking->renter_name} mengajukan peminjaman ruangan {$booking->room->name} pada tanggal " . $booking->date->format('d M Y') . ".";
+
                 Notification::make()
                     ->title('Peminjaman Baru!')
-                    ->body("{$booking->renter_name} mengajukan peminjaman ruangan {$booking->room->name} pada tanggal " . $booking->date->format('d M Y') . ".")
+                    ->body($adminBody)
                     ->icon('heroicon-o-calendar')
                     ->info()
                     ->sendToDatabase($admins);
+
+                \App\Services\WebPushService::sendToUsers($admins, [
+                    'title' => 'Peminjaman Baru!',
+                    'body'  => $adminBody,
+                    'url'   => '/admin/bookings',
+                    'tag'   => "booking-new-{$booking->id}",
+                ]);
             }
 
             // Kirim notifikasi ke user
             if ($booking->user_id) {
                 $user = User::find($booking->user_id);
                 if ($user) {
+                    $userBody = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah diajukan dan sedang menunggu persetujuan admin.";
+
                     Notification::make()
                         ->title('Peminjaman Berhasil Diajukan')
-                        ->body("Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah diajukan dan sedang menunggu persetujuan admin.")
+                        ->body($userBody)
                         ->icon('heroicon-o-clock')
                         ->info()
                         ->sendToDatabase($user);
+
+                    \App\Services\WebPushService::sendToUsers($user, [
+                        'title' => 'Peminjaman Berhasil Diajukan',
+                        'body'  => $userBody,
+                        'url'   => '/user/bookings',
+                        'tag'   => "booking-created-{$booking->id}",
+                    ]);
                 }
             }
         });
@@ -97,12 +115,22 @@ class Booking extends Model
                 if ($user) {
                     $statusText = $booking->status === 'approved' ? 'DISETUJUI' : 'DITOLAK';
                     $color = $booking->status === 'approved' ? 'success' : 'danger';
+                    $title = "Peminjaman Ruangan {$statusText}";
+                    $body = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah {$booking->status}.";
+
                     Notification::make()
-                        ->title("Peminjaman Ruangan {$statusText}")
-                        ->body("Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah {$booking->status}.")
+                        ->title($title)
+                        ->body($body)
                         ->icon($booking->status === 'approved' ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                         ->color($color)
                         ->sendToDatabase($user);
+
+                    \App\Services\WebPushService::sendToUsers($user, [
+                        'title' => $title,
+                        'body'  => $body,
+                        'url'   => '/user/bookings',
+                        'tag'   => "booking-status-{$booking->id}",
+                    ]);
                 }
             }
 
