@@ -33,6 +33,10 @@ class UserPanelProvider extends PanelProvider
             ->profile(\App\Filament\Pages\Auth\EditProfile::class)
             ->authGuard('web')
             ->databaseNotifications()
+            ->renderHook(
+                'panels::head.end',
+                fn (): string => view('partials.pwa-head')->render(),
+            )
             ->font('Plus Jakarta Sans')
             ->sidebarCollapsibleOnDesktop()
             ->colors([
