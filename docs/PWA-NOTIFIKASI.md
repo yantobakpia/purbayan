@@ -17,8 +17,12 @@ push ke perangkat lewat **Web Push + VAPID**, tanpa perlu Firebase.
 composer require minishlink/web-push
 ```
 
-Butuh ekstensi PHP `openssl`, `curl`, `mbstring`, dan salah satu dari `gmp` atau `bcmath`
-(untuk enkripsi payload). Cek dengan `php -m`.
+Butuh **PHP 8.3+** dan ekstensi `openssl`, `curl`, `mbstring`, `json`.
+Cek dengan `php -m`.
+
+> Syarat PHP 8.3+ berasal dari `filament/filament` → `openspout/openspout`,
+> jadi sudah berlaku sebelum fitur push ini ada. Di PHP 8.2 `composer install`
+> gagal untuk seluruh project, bukan cuma bagian push.
 
 ### 2. Buat kunci VAPID
 
