@@ -34,6 +34,10 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('web')
             ->databaseNotifications()
             ->renderHook(
+                'panels::head.end',
+                fn (): string => view('partials.pwa-head')->render(),
+            )
+            ->renderHook(
                 'panels::body.end',
                 fn (): string => view('filament.parts.desktop-notifications'),
             )

@@ -20,12 +20,21 @@ class Complaint extends Model
             $admins = User::where('is_admin', true)->orWhere('email', 'admin@ruangan.com')->get();
             if ($admins->isNotEmpty()) {
                 $roomName = $complaint->room ? " (Ruangan: {$complaint->room->name})" : "";
+                $body = "Keluhan baru dari {$complaint->name}{$roomName}: " . \Illuminate\Support\Str::limit($complaint->complaint_text, 50);
+
                 Notification::make()
                     ->title('Keluhan Baru!')
-                    ->body("Keluhan baru dari {$complaint->name}{$roomName}: " . \Illuminate\Support\Str::limit($complaint->complaint_text, 50))
+                    ->body($body)
                     ->icon('heroicon-o-exclamation-triangle')
                     ->warning()
                     ->sendToDatabase($admins);
+
+                \App\Services\WebPushService::sendToUsers($admins, [
+                    'title' => 'Keluhan Baru!',
+                    'body'  => $body,
+                    'url'   => '/admin/complaints',
+                    'tag'   => "complaint-new-{$complaint->id}",
+                ]);
             }
         });
     }

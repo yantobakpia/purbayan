@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,5 +22,16 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/admin/unread-notifications', [RoomController::class, 'unreadNotifications'])
     ->name('admin.unread-notifications');
+
+// Web Push (PWA notifikasi Android & iOS)
+Route::prefix('push')->name('push.')->group(function () {
+    Route::get('/public-key', [PushSubscriptionController::class, 'publicKey'])->name('public-key');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/subscribe', [PushSubscriptionController::class, 'store'])->name('subscribe');
+        Route::post('/unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('unsubscribe');
+        Route::post('/test', [PushSubscriptionController::class, 'test'])->name('test')->middleware('throttle:6,1');
+    });
+});
 
 Route::redirect('/login', '/user/login')->name('login');
