@@ -117,8 +117,10 @@ class Booking extends Model
                     $color = $booking->status === 'approved' ? 'success' : 'danger';
                     $title = "Peminjaman Ruangan {$statusText}";
                     $body = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah {$booking->status}.";
-                    if ($booking->status === 'rejected' && $booking->rejection_reason) {
-                        $body .= "\n\nAlasan: {$booking->rejection_reason}";
+                    
+                    $reason = $booking->getAttribute('rejection_reason');
+                    if ($booking->status === 'rejected' && $reason) {
+                        $body .= "\n\nAlasan: {$reason}";
                     }
 
                     Notification::make()
@@ -147,9 +149,11 @@ class Booking extends Model
                         . "Waktu: " . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . " WIB\n\n"
                         . "Terima kasih.";
                 } else {
+                    // Ambil alasan dari attribute array agar pasti terbaca nilai terbarunya
+                    $reason = $booking->getAttribute('rejection_reason');
                     $message = "Halo {$booking->renter_name}, peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " (" . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . ") telah DITOLAK oleh admin.";
-                    if ($booking->rejection_reason) {
-                        $message .= "\n\nAlasan: {$booking->rejection_reason}";
+                    if ($reason) {
+                        $message .= "\n\nAlasan: {$reason}";
                     }
                     $message .= "\n\nSilakan ajukan peminjaman kembali dengan jadwal atau ruangan lain.";
                 }
