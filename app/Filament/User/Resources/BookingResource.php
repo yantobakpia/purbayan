@@ -34,6 +34,9 @@ class BookingResource extends Resource
                 Forms\Components\TextInput::make('renter_phone')
                     ->label('No. WhatsApp / Telepon')
                     ->required(),
+                Forms\Components\TextInput::make('department')
+                    ->label('Tim pelayanan/Bidang')
+                    ->required(),
                 Forms\Components\DatePicker::make('date')
                     ->label('Tanggal')
                     ->required()
@@ -71,6 +74,7 @@ class BookingResource extends Resource
                     ->label('Surat Permohonan (PDF)')
                     ->acceptedFileTypes(['application/pdf'])
                     ->maxSize(5120) // 5 MB
+                    ->disk('public')
                     ->directory('permit_letters')
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('rejection_reason')
@@ -95,6 +99,7 @@ class BookingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('room.name')->label('Ruangan')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('department')->label('Tim/Bidang')->searchable(),
                 Tables\Columns\TextColumn::make('date')->label('Tanggal')->date('d M Y')->sortable(),
                 Tables\Columns\TextColumn::make('start_time')->label('Mulai')->formatStateUsing(fn($state) => substr($state,0,5)),
                 Tables\Columns\TextColumn::make('end_time')->label('Selesai')->formatStateUsing(fn($state) => substr($state,0,5)),

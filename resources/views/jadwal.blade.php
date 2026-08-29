@@ -522,21 +522,20 @@
                             <th>Nama Ruangan</th>
                             <th>Kapasitas</th>
                             <th>Status Terkini</th>
-                            
+                            <th>Tim/Bidang</th>
+                            <th>Keperluan</th>
+                            <th>Sisa Waktu</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($rooms as $room)
                         @php
                             $nowTime = now()->format('H:i:s');
-                            $hasActiveBooking = $room->current_booking_id || $room->bookings()
-                                ->where('date', today())
-                                ->where('status', 'approved')
-                                ->where('start_time', '<=', $nowTime)
-                                ->where('end_time', '>', $nowTime)
-                                ->exists();
-                            $isOccupied = $room->is_occupied || $hasActiveBooking;
+                            $activeBooking = $room->bookings->first();
+                            $currentBooking = $room->currentBooking;
+                            $isOccupied = $room->is_occupied || $room->current_booking_id || $activeBooking;
                             $isCleaning = $room->is_cleaning;
+                            $displayBooking = $activeBooking ?? $currentBooking;
                         @endphp
                         <tr>
                             <td style="font-weight: 700;">{{ $room->name }}</td>
@@ -550,7 +549,15 @@
                                     <span class="badge-status status-available">Tersedia</span>
                                 @endif
                             </td>
-                                
+                            <td>{{ $isOccupied && $displayBooking ? $displayBooking->department : '-' }}</td>
+                            <td>{{ $isOccupied && $displayBooking ? Str::limit($displayBooking->purpose, 50) : '-' }}</td>
+                            <td>
+                                @if($isOccupied && $displayBooking)
+                                    <span class="countdown-cell" data-end="{{ $displayBooking->date->format('Y-m-d') }}T{{ $displayBooking->end_time }}">--:--:--</span>
+                                @else
+                                    -
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -593,40 +600,6 @@
             <div id="calDaysGrid" class="calendar-grid" style="margin-top: 0.5rem;"></div>
         </div>
 
-        <div class="table-card">
-            <div style="overflow-x: auto;">
-                <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th>Ruangan</th>
-                            <th>Tanggal</th>
-                            <th>Jam</th>
-                            <th>Peminjam</th>
-                            <th>Keperluan</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scheduleTableBody">
-                        @forelse($approvedBookings as $b)
-                        <tr data-date="{{ $b->date->format('Y-m-d') }}">
-                            <td><strong>{{ $b->room->name }}</strong></td>
-                            <td>{{ $b->date->format('d M Y') }}</td>
-                            <td><span class="time-pill">{{ substr($b->start_time, 0, 5) }} – {{ substr($b->end_time, 0, 5) }}</span></td>
-                            <td>{{ $b->renter_name }}</td>
-                            <td>{{ Str::limit($b->purpose, 45) }}</td>
-                            <td>
-                                <span class="badge-status status-available" style="margin-bottom:0; font-size:0.75rem;">Disetujui</span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr id="emptyRow">
-                            <td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">Belum ada jadwal peminjaman yang disetujui.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </section>
 
 </div>
@@ -655,6 +628,7 @@
         $bookingsData[$dateStr][] = [
             'room_name' => $b->room->name,
             'renter_name' => $b->renter_name,
+            'department' => $b->department,
             'start_time' => substr($b->start_time, 0, 5),
             'end_time' => substr($b->end_time, 0, 5),
             'purpose' => $b->purpose,
@@ -734,6 +708,7 @@
                 <div class="modal-booking-item">
                     <div class="modal-booking-room">🏛️ ${escapeHtml(b.room_name)}</div>
                     <div class="modal-booking-renter">👤 Peminjam: ${escapeHtml(b.renter_name)}</div>
+                    ${b.department ? `<div class="modal-booking-renter">🏢 Tim/Bidang: ${escapeHtml(b.department)}</div>` : ''}
                     <div class="modal-booking-time">⏰ Waktu: ${escapeHtml(b.start_time)} – ${escapeHtml(b.end_time)} WIB</div>
                     ${b.purpose ? `<div class="modal-booking-purpose"><strong>Keperluan:</strong> ${escapeHtml(b.purpose)}</div>` : ''}
                 </div>
@@ -807,7 +782,29 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         renderCalendar();
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
     });
+
+    function updateCountdowns() {
+        document.querySelectorAll('.countdown-cell').forEach(function(el) {
+            const endTime = new Date(el.getAttribute('data-end')).getTime();
+            const now = new Date().getTime();
+            const distance = endTime - now;
+            if (distance < 0) {
+                el.innerHTML = 'Waktu Habis';
+                el.style.color = '#dc2626';
+                return;
+            }
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            el.innerHTML = String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0') + ':' + String(seconds).padStart(2,'0');
+            el.style.color = distance < 10 * 60 * 1000 ? '#dc2626' : '#16a34a';
+            el.style.fontWeight = '700';
+            el.style.fontFamily = 'monospace';
+        });
+    }
 
     (function() {
         let currentHash = null;

@@ -23,7 +23,14 @@ class RoomController extends Controller
 
     public function jadwalPage()
     {
-        $rooms = Room::all();
+        $nowTime = now()->format('H:i:s');
+        $rooms = Room::with(['bookings' => function ($q) use ($nowTime) {
+            $q->where('date', today())
+              ->where('status', 'approved')
+              ->where('start_time', '<=', $nowTime)
+              ->where('end_time', '>', $nowTime);
+        }, 'currentBooking'])->get();
+
         $approvedBookings = Booking::with('room')
             ->where('status', 'approved')
             ->orderBy('date')
@@ -119,6 +126,7 @@ class RoomController extends Controller
             'room_id'         => 'required|exists:rooms,id',
             'renter_name'     => 'required|string|max:255',
             'renter_phone'    => 'required|string|max:20',
+            'department'      => 'required|string|max:255',
             'date'            => 'required|date|after:today',
             'start_time'      => 'required',
             'end_time'        => 'required|after:start_time',
@@ -189,6 +197,7 @@ class RoomController extends Controller
                     'user_id'            => $userId,
                     'renter_name'        => $validated['renter_name'],
                     'renter_phone'       => $validated['renter_phone'],
+                    'department'         => $validated['department'],
                     'date'               => $d,
                     'start_time'         => $validated['start_time'],
                     'end_time'           => $validated['end_time'],
@@ -210,6 +219,7 @@ class RoomController extends Controller
                 'user_id'            => $userId,
                 'renter_name'        => $validated['renter_name'],
                 'renter_phone'       => $validated['renter_phone'],
+                'department'         => $validated['department'],
                 'date'               => $validated['date'],
                 'start_time'         => $validated['start_time'],
                 'end_time'           => $validated['end_time'],
@@ -247,43 +257,48 @@ class RoomController extends Controller
 
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $filename = uniqid() . '.webp';
-            
-            $info = getimagesize($file->getRealPath());
-            $image = null;
-            if ($info) {
-                $mime = $info['mime'];
-                switch ($mime) {
-                    case 'image/jpeg':
-                        $image = imagecreatefromjpeg($file->getRealPath());
-                        break;
-                    case 'image/png':
-                        $image = imagecreatefrompng($file->getRealPath());
-                        if ($image) {
-                            imagepalettetotruecolor($image);
-                            imagesavealpha($image, true);
-                        }
-                        break;
-                    case 'image/gif':
-                        $image = imagecreatefromgif($file->getRealPath());
-                        break;
-                    case 'image/webp':
-                        $image = imagecreatefromwebp($file->getRealPath());
-                        break;
+
+            // Coba konversi ke WebP jika GD tersedia
+            if (extension_loaded('gd')) {
+                $filename = uniqid() . '.webp';
+                $info = getimagesize($file->getRealPath());
+                $image = null;
+                if ($info) {
+                    $mime = $info['mime'];
+                    switch ($mime) {
+                        case 'image/jpeg':
+                            $image = imagecreatefromjpeg($file->getRealPath());
+                            break;
+                        case 'image/png':
+                            $image = imagecreatefrompng($file->getRealPath());
+                            if ($image) {
+                                imagepalettetotruecolor($image);
+                                imagesavealpha($image, true);
+                            }
+                            break;
+                        case 'image/gif':
+                            $image = imagecreatefromgif($file->getRealPath());
+                            break;
+                        case 'image/webp':
+                            $image = imagecreatefromwebp($file->getRealPath());
+                            break;
+                    }
                 }
-            }
 
-            if ($image) {
-                ob_start();
-                imagewebp($image, null, 80);
-                $webpData = ob_get_clean();
-                imagedestroy($image);
+                if ($image) {
+                    ob_start();
+                    imagewebp($image, null, 80);
+                    $webpData = ob_get_clean();
+                    imagedestroy($image);
 
-                \Illuminate\Support\Facades\Storage::disk('public')->put('complaints/' . $filename, $webpData);
-                $validated['photo_path'] = 'complaints/' . $filename;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put('complaints/' . $filename, $webpData);
+                    $validated['photo_path'] = 'complaints/' . $filename;
+                } else {
+                    $validated['photo_path'] = $file->store('complaints', 'public');
+                }
             } else {
-                $path = $file->store('complaints', 'public');
-                $validated['photo_path'] = $path;
+                // GD tidak tersedia — simpan file langsung
+                $validated['photo_path'] = $file->store('complaints', 'public');
             }
         }
 

@@ -326,6 +326,10 @@
                         <label for="renter_name">Nama Peminjam</label>
                         <input type="text" name="renter_name" id="renter_name" value="{{ old('renter_name', auth()->user()->name) }}" placeholder="Nama lengkap" required>
                     </div>
+                    <div class="form-group">
+                        <label for="department">Tim Pelayanan / Bidang</label>
+                        <input type="text" name="department" id="department" value="{{ old('department') }}" placeholder="Contoh: Bidang Kesehatan, Tim IT..." required>
+                    </div>
                     <input type="hidden" name="renter_phone" value="{{ auth()->user()->phone ?? '08123456789' }}">
                     <div class="form-group full">
                         <label for="permit_letter">Surat Permohonan (Opsional, PDF, Maksimal 5 MB)</label>
@@ -381,6 +385,7 @@
                                     <th>Ruangan</th>
                                     <th>Tanggal</th>
                                     <th>Jam</th>
+                                    <th>Tim/Bidang</th>
                                     <th>Surat</th>
                                     <th>Catatan Admin</th>
                                     <th>Status</th>
@@ -393,6 +398,7 @@
                                         <td><strong>{{ $b->room->name }}</strong></td>
                                         <td>{{ $b->date->format('d M Y') }}</td>
                                         <td><span class="time-pill">{{ substr($b->start_time, 0, 5) }} - {{ substr($b->end_time, 0, 5) }}</span></td>
+                                        <td>{{ $b->department ?? '-' }}</td>
                                         <td>
                                             @if($b->permit_letter_path)
                                                 <a href="{{ asset('storage/' . $b->permit_letter_path) }}" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">📄 PDF</a>
@@ -431,7 +437,7 @@
                                     </tr>
                                     @if($b->status === 'rejected' && $b->rejection_reason)
                                         <tr style="background: var(--danger-bg);">
-                                            <td colspan="7" style="padding: 0.75rem 1.25rem; font-size: 0.85rem; color: var(--danger-text); border-bottom: 1px solid var(--danger-border);">
+                                            <td colspan="8" style="padding: 0.75rem 1.25rem; font-size: 0.85rem; color: var(--danger-text); border-bottom: 1px solid var(--danger-border);">
                                                 <strong>Alasan Penolakan:</strong> {{ $b->rejection_reason }}
                                             </td>
                                         </tr>

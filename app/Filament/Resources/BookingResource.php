@@ -20,6 +20,16 @@ class BookingResource extends Resource
     protected static ?string $pluralModelLabel = 'Peminjaman';
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'pending')->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -33,6 +43,7 @@ class BookingResource extends Resource
                 ->required(),
             Forms\Components\TextInput::make('renter_name')->label('Nama Peminjam')->required(),
             Forms\Components\TextInput::make('renter_phone')->label('No. Telepon')->required(),
+            Forms\Components\TextInput::make('department')->label('Tim pelayanan/Bidang')->required(),
             Forms\Components\DatePicker::make('date')
                 ->label('Tanggal')
                 ->required(),
@@ -63,6 +74,7 @@ class BookingResource extends Resource
                 ->label('Surat Permohonan (PDF)')
                 ->acceptedFileTypes(['application/pdf'])
                 ->maxSize(5120) // 5 MB
+                ->disk('public')
                 ->directory('permit_letters')
                 ->columnSpanFull(),
             Forms\Components\Textarea::make('rejection_reason')
@@ -83,6 +95,7 @@ class BookingResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('room.name')->label('Ruangan')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('renter_name')->label('Peminjam')->searchable(),
+                Tables\Columns\TextColumn::make('department')->label('Tim/Bidang')->searchable(),
                 Tables\Columns\TextColumn::make('renter_phone')->label('No. HP'),
                 Tables\Columns\TextColumn::make('date')->label('Tanggal')->date('d M Y')->sortable(),
                 Tables\Columns\TextColumn::make('start_time')->label('Mulai')->formatStateUsing(fn($state) => substr($state,0,5)),

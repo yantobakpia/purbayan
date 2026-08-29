@@ -9,7 +9,7 @@ use Filament\Notifications\Notification;
 class Booking extends Model
 {
     protected $fillable = [
-        'room_id', 'user_id', 'renter_name', 'renter_email', 'renter_phone',
+        'room_id', 'user_id', 'renter_name', 'renter_email', 'renter_phone', 'department',
         'date', 'start_time', 'end_time', 'purpose', 'status', 'rejection_reason', 'admin_note',
         'check_in_code', 'checked_in_at', 'permit_letter_path', 'recurring_token',
     ];
@@ -117,6 +117,9 @@ class Booking extends Model
                     $color = $booking->status === 'approved' ? 'success' : 'danger';
                     $title = "Peminjaman Ruangan {$statusText}";
                     $body = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah {$booking->status}.";
+                    if ($booking->status === 'rejected' && $booking->rejection_reason) {
+                        $body .= "\n\nAlasan: {$booking->rejection_reason}";
+                    }
 
                     Notification::make()
                         ->title($title)
@@ -144,7 +147,11 @@ class Booking extends Model
                         . "Waktu: " . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . " WIB\n\n"
                         . "Terima kasih.";
                 } else {
-                    $message = "Halo {$booking->renter_name}, peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " (" . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . ") telah DITOLAK oleh admin. Silakan ajukan peminjaman kembali dengan jadwal atau ruangan lain.";
+                    $message = "Halo {$booking->renter_name}, peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " (" . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . ") telah DITOLAK oleh admin.";
+                    if ($booking->rejection_reason) {
+                        $message .= "\n\nAlasan: {$booking->rejection_reason}";
+                    }
+                    $message .= "\n\nSilakan ajukan peminjaman kembali dengan jadwal atau ruangan lain.";
                 }
                 \App\Services\WhatsAppService::sendNotification($booking->renter_phone, $message);
             }

@@ -55,11 +55,15 @@ class ComplaintResource extends Resource
             Forms\Components\FileUpload::make('photo_path')
                 ->label('Foto Keluhan')
                 ->image()
+                ->disk('public')
                 ->directory('complaints')
                 ->columnSpanFull()
                 ->saveUploadedFileUsing(function (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file) {
-                    $filename = uniqid() . '.webp';
+                    if (!extension_loaded('gd')) {
+                        return $file->storeAs('complaints', uniqid() . '.' . $file->getClientOriginalExtension(), 'public');
+                    }
 
+                    $filename = uniqid() . '.webp';
                     $info = getimagesize($file->getRealPath());
                     $image = null;
                     if ($info) {
@@ -107,7 +111,9 @@ class ComplaintResource extends Resource
                 Tables\Columns\TextColumn::make('name')->label('Nama')->searchable(),
                 Tables\Columns\TextColumn::make('email_or_phone')->label('No. HP'),
                 Tables\Columns\TextColumn::make('room.name')->label('Ruangan')->placeholder('-'),
-                Tables\Columns\ImageColumn::make('photo_path')->label('Foto'),
+                Tables\Columns\ImageColumn::make('photo_path')
+                    ->label('Foto')
+                    ->disk('public'),
                 Tables\Columns\TextColumn::make('complaint_text')->label('Keluhan')->limit(60),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')

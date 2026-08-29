@@ -143,12 +143,20 @@
                             <span class="value">{{ $room->currentBooking->renter_name }}</span>
                         </div>
                         <div class="info-row">
+                            <span class="label">Tim/Bidang</span>
+                            <span class="value">{{ $room->currentBooking->department }}</span>
+                        </div>
+                        <div class="info-row">
                             <span class="label">Keperluan</span>
                             <span class="value">{{ Str::limit($room->currentBooking->purpose, 35) }}</span>
                         </div>
                         <div class="info-row">
                             <span class="label">Selesai</span>
                             <span class="value">{{ substr($room->currentBooking->end_time, 0, 5) }} WIB</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Sisa Waktu</span>
+                            <span class="value countdown" data-end="{{ $room->currentBooking->date->format('Y-m-d') }} {{ $room->currentBooking->end_time }}">--:--:--</span>
                         </div>
                     @elseif($room->is_occupied && !$activeBooking)
                         <div class="info-row">
@@ -160,12 +168,20 @@
                             <span class="value">{{ $activeBooking->renter_name }}</span>
                         </div>
                         <div class="info-row">
+                            <span class="label">Tim/Bidang</span>
+                            <span class="value">{{ $activeBooking->department }}</span>
+                        </div>
+                        <div class="info-row">
                             <span class="label">Keperluan</span>
                             <span class="value">{{ Str::limit($activeBooking->purpose, 35) }}</span>
                         </div>
                         <div class="info-row">
                             <span class="label">Selesai</span>
                             <span class="value">{{ substr($activeBooking->end_time, 0, 5) }} WIB</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Sisa Waktu</span>
+                            <span class="value countdown" data-end="{{ $activeBooking->date->format('Y-m-d') }} {{ $activeBooking->end_time }}">--:--:--</span>
                         </div>
                     @endif
                 @else
@@ -189,4 +205,30 @@
         </div>
         @endforelse
     </div>
+
+    <script>
+        function updateCountdowns() {
+            document.querySelectorAll('.countdown').forEach(function(el) {
+                const endTime = new Date(el.getAttribute('data-end')).getTime();
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    el.innerHTML = "Waktu Habis";
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                el.innerHTML = String(hours).padStart(2, '0') + ":" + 
+                               String(minutes).padStart(2, '0') + ":" + 
+                               String(seconds).padStart(2, '0');
+            });
+        }
+
+        setInterval(updateCountdowns, 1000);
+        updateCountdowns(); // Initial call
+    </script>
 </x-filament-panels::page>

@@ -69,11 +69,24 @@
             color: #cbd5e1; 
             font-weight: 400;
         }
-        .hero-cta {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+        .hero-clock-wrap {
+            margin-bottom: 1.5rem;
+        }
+        .hero-clock {
+            font-size: 3.5rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            text-shadow: 0 2px 20px rgba(147, 197, 253, 0.4);
+            line-height: 1;
+        }
+        .hero-date {
+            margin-top: 0.4rem;
+            font-size: 1rem;
+            color: #93c5fd;
+            font-weight: 500;
+            letter-spacing: 0.02em;
         }
 
         nav {
@@ -464,6 +477,7 @@
 
         @media (max-width: 768px) {
             .hero { padding: 2.5rem 1rem 3rem 1rem; }
+            .hero-clock { font-size: 2.25rem; }
             .hero-title { font-size: 1.85rem; }
             .hero-subtitle { font-size: 0.95rem; margin-bottom: 1.5rem; }
             .container { padding: 1.5rem 1rem; }
@@ -480,12 +494,12 @@
 <body>
 
 <header class="hero">
+    <div class="hero-clock-wrap">
+        <div id="hero-clock" class="hero-clock">00:00:00</div>
+        <div id="hero-date" class="hero-date"></div>
+    </div>
     <h1 class="hero-title">Sistem Peminjaman Ruangan</h1>
     <p class="hero-subtitle">Platform peminjaman ruangan yang transparan, mudah, dan terintegrasi secara real-time</p>
-    <div class="hero-cta">
-        <a href="{{ route('peminjaman.page') }}" class="btn-hero btn-hero-primary">Pesan Ruangan</a>
-        <a href="{{ route('complaint.page') }}" class="btn-hero btn-hero-secondary">Ajukan Keluhan</a>
-    </div>
 </header>
 
 <nav>
@@ -653,6 +667,22 @@
     })();
 </script>
 <script>
+    // Real-time clock
+    (function() {
+        const DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function tick() {
+            const now = new Date();
+            document.getElementById('hero-clock').textContent =
+                pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+            document.getElementById('hero-date').textContent =
+                DAYS[now.getDay()] + ', ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+        }
+        tick();
+        setInterval(tick, 1000);
+    })();
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js')
