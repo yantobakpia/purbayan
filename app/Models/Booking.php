@@ -144,6 +144,7 @@ class Booking extends Model
                     $message = "Halo, permohonan peminjaman ruangan Anda telah disetujui.\n\n"
                         . "Data Anda:\n"
                         . "Nama: {$booking->renter_name}\n"
+                        . "Bidang/Tim: " . ($booking->department ?? '-') . "\n"
                         . "Ruangan: {$booking->room->name}\n"
                         . "Tanggal: " . $booking->date->format('d M Y') . "\n"
                         . "Waktu: " . substr($booking->start_time, 0, 5) . " - " . substr($booking->end_time, 0, 5) . " WIB\n\n"
