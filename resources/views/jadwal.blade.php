@@ -604,6 +604,37 @@
             <div id="calDaysGrid" class="calendar-grid" style="margin-top: 0.5rem;"></div>
         </div>
 
+        <div class="table-card">
+            <div style="overflow-x: auto;">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Waktu</th>
+                            <th>Ruangan</th>
+                            <th>Peminjam</th>
+                            <th>Tim/Bidang</th>
+                            <th>Keperluan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                        @forelse($approvedBookings->take(10) as $b)
+                            <tr data-date="{{ $b->date->format('Y-m-d') }}">
+                                <td>{{ $b->date->format('d M Y') }}</td>
+                                <td><span class="time-pill">{{ substr($b->start_time, 0, 5) }} - {{ substr($b->end_time, 0, 5) }}</span></td>
+                                <td><strong style="color: var(--primary);">{{ $b->room->name }}</strong></td>
+                                <td>{{ $b->renter_name }}</td>
+                                <td>{{ $b->department ?? '-' }}</td>
+                                <td>{{ Str::limit($b->purpose, 40) ?? '-' }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" style="text-align: center; color: var(--muted);">Belum ada jadwal yang disetujui.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </section>
 
 </div>
