@@ -27,7 +27,7 @@ class UserPanelProvider extends PanelProvider
         return $panel
             ->id('user')
             ->path('user')
-            ->login(\App\Filament\User\Pages\Auth\Login::class)
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->registration(\App\Filament\User\Pages\Auth\Register::class)
             ->passwordReset(\App\Filament\Pages\Auth\RequestPasswordReset::class)
             ->authGuard('web')

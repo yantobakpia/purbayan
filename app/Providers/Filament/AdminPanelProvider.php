@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->passwordReset(\App\Filament\Pages\Auth\RequestPasswordReset::class)
             ->profile(\App\Filament\Pages\Auth\EditProfile::class)
             ->authGuard('web')
