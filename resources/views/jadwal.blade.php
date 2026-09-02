@@ -792,8 +792,12 @@
             const now = new Date().getTime();
             const distance = endTime - now;
             if (distance < 0) {
-                el.innerHTML = 'Waktu Habis';
-                el.style.color = '#dc2626';
+                if (el.innerHTML !== 'Waktu Habis') {
+                    el.innerHTML = 'Waktu Habis';
+                    el.style.color = '#dc2626';
+                    // Paksa refresh halaman saat itu juga (1x saja per pergantian)
+                    window.location.reload();
+                }
                 return;
             }
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

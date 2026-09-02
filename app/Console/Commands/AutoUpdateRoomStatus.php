@@ -54,12 +54,17 @@ class AutoUpdateRoomStatus extends Command
                     $currentBooking = Booking::find($room->current_booking_id);
                     if ($currentBooking && ($currentBooking->date->format('Y-m-d') !== $today || $nowTime >= $currentBooking->end_time)) {
                         $currentBooking->update(['status' => 'selesai']);
-                        $room->update([
-                            'is_occupied' => false,
-                            'current_booking_id' => null,
-                        ]);
-                        $this->info("Room {$room->name} set to available, booking ID {$currentBooking->id} selesai");
                     }
+                    $room->update([
+                        'is_occupied' => false,
+                        'current_booking_id' => null,
+                    ]);
+                    $this->info("Room {$room->name} set to available, current booking cleared.");
+                } else if ($room->is_occupied) {
+                    $room->update([
+                        'is_occupied' => false,
+                    ]);
+                    $this->info("Room {$room->name} set to available.");
                 }
             }
 
@@ -74,6 +79,11 @@ class AutoUpdateRoomStatus extends Command
                         });
                 })
                 ->update(['status' => 'selesai']);
+
+            // 3. Pastikan flag is_occupied false jika tidak ada activeBooking dan no current_booking_id
+            if (!$activeBooking && $room->is_occupied) {
+                $room->update(['is_occupied' => false, 'current_booking_id' => null]);
+            }
         }
 
         $this->info('Room statuses updated successfully.');
