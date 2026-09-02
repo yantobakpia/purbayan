@@ -37,7 +37,13 @@ class RoomController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return view('jadwal', compact('rooms', 'approvedBookings'));
+        $paginatedBookings = Booking::with('room')
+            ->where('status', 'approved')
+            ->orderBy('date', 'desc')
+            ->orderBy('start_time', 'desc')
+            ->paginate(10);
+
+        return view('jadwal', compact('rooms', 'approvedBookings', 'paginatedBookings'));
     }
 
     public function peminjamanPage()

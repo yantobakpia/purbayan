@@ -618,7 +618,7 @@
                         </tr>
                     </thead>
                     <tbody id="scheduleTableBody">
-                        @forelse($approvedBookings->take(10) as $b)
+                        @forelse($paginatedBookings as $b)
                             <tr data-date="{{ $b->date->format('Y-m-d') }}">
                                 <td>{{ $b->date->format('d M Y') }}</td>
                                 <td><span class="time-pill">{{ substr($b->start_time, 0, 5) }} - {{ substr($b->end_time, 0, 5) }}</span></td>
@@ -632,6 +632,9 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border);">
+                {{ $paginatedBookings->links() }}
             </div>
         </div>
 
