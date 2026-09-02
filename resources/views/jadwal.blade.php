@@ -281,6 +281,10 @@
             color: white;
             border-color: var(--primary);
         }
+        .calendar-box {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -469,11 +473,11 @@
             .container { padding: 1.5rem 1rem; }
             .rooms-grid { grid-template-columns: 1fr; gap: 1.25rem; }
             .table-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .calendar-grid { gap: 0.2rem; }
+            .calendar-grid { gap: 0.2rem; min-width: 300px; }
             .cal-day-cell { padding: 0.4rem 0.1rem; font-size: 0.75rem; }
             .cal-head { font-size: 0.65rem; }
             .section-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
-            .calendar-filter-bar { width: 100%; justify-content: flex-start; }
+            .calendar-filter-bar { width: 100%; justify-content: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem; }
         }
     </style>
 </head>
@@ -789,14 +793,15 @@
     function updateCountdowns() {
         document.querySelectorAll('.countdown-cell').forEach(function(el) {
             const endTime = new Date(el.getAttribute('data-end')).getTime();
+            if (!endTime) return;
             const now = new Date().getTime();
             const distance = endTime - now;
             if (distance < 0) {
                 if (el.innerHTML !== 'Waktu Habis') {
                     el.innerHTML = 'Waktu Habis';
                     el.style.color = '#dc2626';
-                    // Paksa refresh halaman saat itu juga (1x saja per pergantian)
-                    window.location.reload();
+                    // Don't force reload here because it causes infinite scroll blocking loops on mobile
+                    // window.location.reload();
                 }
                 return;
             }
