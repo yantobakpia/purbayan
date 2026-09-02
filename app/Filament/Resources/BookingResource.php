@@ -155,6 +155,7 @@ class BookingResource extends Resource
                         Forms\Components\Textarea::make('admin_note')
                             ->label('Catatan Admin')
                             ->columnSpanFull()
+                            ->default('Ruangan diharapkan digunakan sesuai ketentuan, serta dikembalikan dalam kondisi semula dan jaga bersih!')
                             ->placeholder('Boleh diisi catatan tambahan ketika menyetujui...'),
                     ])
                     ->action(function (Booking $record, array $data) {
