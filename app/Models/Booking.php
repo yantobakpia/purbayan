@@ -10,7 +10,7 @@ class Booking extends Model
 {
     protected $fillable = [
         'room_id', 'user_id', 'renter_name', 'renter_email', 'renter_phone', 'department',
-        'date', 'start_time', 'end_time', 'purpose', 'status', 'rejection_reason', 'admin_note',
+        'date', 'start_time', 'end_time', 'purpose', 'price', 'status', 'rejection_reason', 'admin_note',
         'check_in_code', 'checked_in_at', 'permit_letter_path', 'recurring_token',
     ];
 
