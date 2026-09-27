@@ -300,15 +300,25 @@
                 @csrf
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="room_id">Ruangan</label>
-                        <select name="room_id" id="room_id" required>
-                            <option value="">-- Pilih Ruangan --</option>
-                            @foreach($rooms as $room)
-                                <option value="{{ $room->id }}" {{ (old('room_id', request('room_id')) == $room->id) ? 'selected' : '' }}>
-                                    {{ $room->name }} ({{ $room->capacity }} orang)
-                                </option>
-                            @endforeach
-                        </select>
+                        <label>Ruangan</label>
+                        @php
+                            $preselectedRoomId = old('room_id', request('room_id'));
+                            $preselectedRoom = $preselectedRoomId ? $rooms->firstWhere('id', $preselectedRoomId) : null;
+                        @endphp
+                        @if($preselectedRoom)
+                            <input type="hidden" name="room_id" value="{{ $preselectedRoom->id }}">
+                            <div style="border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 0.7rem 1rem; background: var(--primary-light); display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                                <span style="font-weight: 700; color: var(--primary-dark);">{{ $preselectedRoom->name }} <span style="font-weight: 500; color: var(--muted);">({{ $preselectedRoom->capacity }} orang)</span></span>
+                                <a href="{{ route('peminjaman.page') }}" style="font-size: 0.8rem; color: var(--muted); text-decoration: none; white-space: nowrap;">Ganti ruangan</a>
+                            </div>
+                        @else
+                            <select name="room_id" id="room_id" required>
+                                <option value="">-- Pilih Ruangan --</option>
+                                @foreach($rooms as $room)
+                                    <option value="{{ $room->id }}">{{ $room->name }} ({{ $room->capacity }} orang)</option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
                     <div class="form-group">
                         <label for="date">Tanggal Mulai / Tanggal Peminjaman</label>
@@ -324,7 +334,7 @@
                     </div>
                     <div class="form-group">
                         <label for="renter_name">Nama Peminjam</label>
-                        <input type="text" name="renter_name" id="renter_name" value="{{ old('renter_name', auth()->user()->name) }}" placeholder="Nama lengkap" required>
+                        <input type="text" name="renter_name" id="renter_name" value="{{ old('renter_name') }}" placeholder="Nama lengkap" required>
                     </div>
                     <div class="form-group">
                         <label for="department">Tim Pelayanan / Bidang</label>
