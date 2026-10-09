@@ -12,6 +12,8 @@ class StatsOverview extends BaseWidget
 {
     protected function getStats(): array
     {
+        Room::syncAllStatuses();
+
         $rentedToday = Booking::where('status', 'approved')
             ->whereDate('date', today())
             ->count();

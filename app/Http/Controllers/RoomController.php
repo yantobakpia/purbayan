@@ -11,6 +11,8 @@ class RoomController extends Controller
 {
     public function index()
     {
+        Room::syncAllStatuses();
+
         $rooms = Room::all();
         $approvedBookings = Booking::with('room')
             ->where('status', 'approved')
@@ -23,6 +25,8 @@ class RoomController extends Controller
 
     public function jadwalPage()
     {
+        Room::syncAllStatuses();
+
         $nowTime = now()->format('H:i:s');
         $rooms = Room::with(['bookings' => function ($q) use ($nowTime) {
             $q->where('date', today())
@@ -42,6 +46,8 @@ class RoomController extends Controller
 
     public function peminjamanPage()
     {
+        Room::syncAllStatuses();
+
         $rooms = Room::all();
         $myBookings = collect();
 
@@ -57,6 +63,8 @@ class RoomController extends Controller
 
     public function complaintPage()
     {
+        Room::syncAllStatuses();
+
         $rooms = Room::all();
         $myComplaints = collect();
 
@@ -80,6 +88,8 @@ class RoomController extends Controller
             abort(403, 'Hanya admin yang dapat mengakses halaman ini.');
         }
 
+        Room::syncAllStatuses();
+
         $rooms = Room::with(['currentBooking', 'bookings' => function ($q) {
             $q->where('date', today())
               ->where('status', 'approved')
@@ -100,6 +110,8 @@ class RoomController extends Controller
 
     public function checkStatus()
     {
+        Room::syncAllStatuses();
+
         $lastBookingUpdate = Booking::max('updated_at');
         $lastRoomUpdate = Room::max('updated_at');
         $lastComplaintUpdate = Complaint::max('updated_at');

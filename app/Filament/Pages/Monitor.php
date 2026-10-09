@@ -16,6 +16,8 @@ class Monitor extends Page
 
     public function mount(): void
     {
+        Room::syncAllStatuses();
+
         $this->rooms = Room::with(['currentBooking', 'bookings' => function ($q) {
             $q->where('date', today())
               ->whereIn('status', ['approved', 'checked_in'])

@@ -10,6 +10,12 @@ class ListRooms extends ListRecords
 {
     protected static string $resource = RoomResource::class;
 
+    public function mount(): void
+    {
+        \App\Models\Room::syncAllStatuses();
+        parent::mount();
+    }
+
     protected function getHeaderActions(): array
     {
         return [

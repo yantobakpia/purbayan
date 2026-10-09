@@ -161,6 +161,14 @@ class Booking extends Model
                 \App\Services\WhatsAppService::sendNotification($booking->renter_phone, $message);
             }
         });
+
+        static::saved(function ($booking) {
+            Room::syncAllStatuses();
+        });
+
+        static::deleted(function ($booking) {
+            Room::syncAllStatuses();
+        });
     }
 
     public function room(): BelongsTo
