@@ -46,7 +46,7 @@ class Booking extends Model
                 ]);
             }
 
-            // Kirim notifikasi ke user
+            // Simpan notifikasi di database portal user
             if ($booking->user_id) {
                 $user = User::find($booking->user_id);
                 if ($user) {
@@ -58,13 +58,6 @@ class Booking extends Model
                         ->icon('heroicon-o-clock')
                         ->info()
                         ->sendToDatabase($user);
-
-                    \App\Services\WebPushService::sendToUsers($user, [
-                        'title' => 'Peminjaman Berhasil Diajukan',
-                        'body'  => $userBody,
-                        'url'   => '/user/bookings',
-                        'tag'   => "booking-created-{$booking->id}",
-                    ]);
                 }
             }
         });
@@ -110,23 +103,29 @@ class Booking extends Model
                 }
             }
 
-            if ($booking->isDirty('status') && $booking->user_id) {
+            if ($booking->isDirty('status') && $booking->user_id && in_array($booking->status, ['approved', 'rejected'])) {
                 $user = User::find($booking->user_id);
                 if ($user) {
-                    $statusText = $booking->status === 'approved' ? 'DISETUJUI' : 'DITOLAK';
-                    $color = $booking->status === 'approved' ? 'success' : 'danger';
+                    $isApproved = $booking->status === 'approved';
+                    $statusText = $isApproved ? 'DISETUJUI' : 'DITOLAK';
+                    $color = $isApproved ? 'success' : 'danger';
                     $title = "Peminjaman Ruangan {$statusText}";
-                    $body = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah {$booking->status}.";
-                    
-                    $reason = $booking->getAttribute('rejection_reason');
-                    if ($booking->status === 'rejected' && $reason) {
-                        $body .= "\n\nAlasan: {$reason}";
+                    $timeStr = substr($booking->start_time, 0, 5) . ' - ' . substr($booking->end_time, 0, 5);
+
+                    if ($isApproved) {
+                        $body = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " ({$timeStr} WIB) telah disetujui.";
+                    } else {
+                        $reason = $booking->getAttribute('rejection_reason');
+                        $body = "Permohonan peminjaman ruangan {$booking->room->name} Anda untuk tanggal " . $booking->date->format('d M Y') . " telah ditolak.";
+                        if ($reason) {
+                            $body .= "\n\nAlasan: {$reason}";
+                        }
                     }
 
                     Notification::make()
                         ->title($title)
                         ->body($body)
-                        ->icon($booking->status === 'approved' ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                        ->icon($isApproved ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                         ->color($color)
                         ->sendToDatabase($user);
 

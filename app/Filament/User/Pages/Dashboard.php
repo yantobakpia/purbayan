@@ -18,9 +18,10 @@ class Dashboard extends BaseDashboard
         return [
             'rooms' => \App\Models\Room::all(),
             'approvedBookings' => \App\Models\Booking::with('room')
-                ->whereIn('status', ['approved', 'checked_in'])
+                ->where('status', 'approved')
                 ->orderBy('date')
                 ->orderBy('start_time')
+                ->take(5)
                 ->get(),
             'myComplaints' => \App\Models\Complaint::with('resolver')->where(function ($q) {
                     if (auth()->check()) {

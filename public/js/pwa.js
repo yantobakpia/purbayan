@@ -17,6 +17,7 @@
 
   var VAPID_KEY = meta('vapid-key') || '';
   var IS_AUTHENTICATED = meta('pwa-authenticated') === '1';
+  var IS_ADMIN = meta('pwa-is-admin') === '1';
   var CSRF = meta('pwa-csrf') || meta('csrf-token') || '';
 
   var supportsServiceWorker = 'serviceWorker' in navigator;
@@ -319,7 +320,11 @@
       return;
     }
 
-    buildBanner('Aktifkan notifikasi untuk info status peminjaman & keluhan.', 'Aktifkan', subscribe);
+    var message = IS_ADMIN
+      ? 'Aktifkan notifikasi untuk info peminjaman baru & keluhan masuk.'
+      : 'Aktifkan notifikasi untuk info persetujuan peminjaman ruangan Anda.';
+
+    buildBanner(message, 'Aktifkan', subscribe);
   }
 
   // -------------------------------------------------------------------------

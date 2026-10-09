@@ -15,9 +15,10 @@ class RoomController extends Controller
 
         $rooms = Room::all();
         $approvedBookings = Booking::with('room')
-            ->whereIn('status', ['approved', 'selesai'])
+            ->where('status', 'approved')
             ->orderBy('date')
             ->orderBy('start_time')
+            ->take(5)
             ->get();
 
         return view('welcome', compact('rooms', 'approvedBookings'));
@@ -36,7 +37,7 @@ class RoomController extends Controller
         }, 'currentBooking'])->get();
 
         $approvedBookings = Booking::with('room')
-            ->whereIn('status', ['approved', 'selesai'])
+            ->where('status', 'approved')
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();

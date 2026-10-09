@@ -109,10 +109,18 @@ class PushSubscriptionController extends Controller
             return response()->json(['ok' => false, 'message' => 'Langganan tidak ditemukan.'], 404);
         }
 
+        $user = $request->user();
+        $isAdmin = $user && ($user->is_admin || $user->email === 'admin@ruangan.com');
+
+        $body = $isAdmin
+            ? 'Anda akan menerima pemberitahuan peminjaman baru & keluhan masuk.'
+            : 'Anda akan menerima pemberitahuan saat peminjaman ruangan Anda disetujui atau ditolak.';
+        $url = $isAdmin ? '/admin/bookings' : '/user/bookings';
+
         WebPushService::sendToSubscriptions([$subscription->id], [
             'title' => 'Notifikasi Aktif!',
-            'body'  => 'Anda akan menerima pemberitahuan peminjaman & keluhan di perangkat ini.',
-            'url'   => '/',
+            'body'  => $body,
+            'url'   => $url,
             'tag'   => 'test-notification',
         ]);
 

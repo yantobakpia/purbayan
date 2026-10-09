@@ -23,6 +23,11 @@
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
 
+  function isAdmin() {
+    var meta = document.querySelector('meta[name="pwa-is-admin"]');
+    return meta && meta.getAttribute('content') === '1';
+  }
+
   function init(root) {
     var statusEl = root.querySelector('[data-push-status]');
     var actionsEl = root.querySelector('[data-push-actions]');
@@ -55,8 +60,13 @@
       testBtn.style.display = subscribed ? 'inline-flex' : 'none';
       toggleBtn.textContent = subscribed ? 'Matikan Notifikasi' : 'Aktifkan Notifikasi';
       toggleBtn.dataset.subscribed = subscribed ? '1' : '0';
+
+      var activeMessage = isAdmin()
+        ? 'Notifikasi aktif di perangkat ini. Anda akan menerima pemberitahuan peminjaman baru & keluhan masuk.'
+        : 'Notifikasi aktif di perangkat ini. Anda akan menerima pemberitahuan saat peminjaman ruangan Anda disetujui atau ditolak.';
+
       statusEl.textContent = subscribed
-        ? 'Notifikasi aktif di perangkat ini. Anda akan diberi tahu saat status peminjaman berubah.'
+        ? activeMessage
         : 'Notifikasi belum aktif di perangkat ini.';
 
       if (Notification.permission === 'denied') {
