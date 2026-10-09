@@ -8,7 +8,7 @@
  * Catatan: naikkan CACHE_VERSION setiap kali file ini atau aset shell berubah.
  */
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `pinjam-ruang-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 

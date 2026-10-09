@@ -37,14 +37,35 @@
   // -------------------------------------------------------------------------
 
   function urlBase64ToUint8Array(base64String) {
-    var padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    if (!base64String) return new Uint8Array(0);
+    var cleanStr = String(base64String).trim().replace(/^["']|["']$/g, '');
+    var padding = '='.repeat((4 - (cleanStr.length % 4)) % 4);
+    var base64 = (cleanStr + padding).replace(/-/g, '+').replace(/_/g, '/');
     var raw = window.atob(base64);
     var output = new Uint8Array(raw.length);
     for (var i = 0; i < raw.length; ++i) {
       output[i] = raw.charCodeAt(i);
     }
     return output;
+  }
+
+  function getVapidKey() {
+    var key = (VAPID_KEY || '').trim();
+    if (key && key !== 'null' && key !== 'undefined') {
+      return Promise.resolve(key);
+    }
+
+    return fetch('/push/public-key', {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.key) {
+          VAPID_KEY = String(data.key).trim();
+          return VAPID_KEY;
+        }
+        throw new Error('Kunci VAPID belum dikonfigurasi di server (.env).');
+      });
   }
 
   /**
@@ -132,10 +153,6 @@
       return Promise.reject(new Error('Browser ini tidak mendukung notifikasi push.'));
     }
 
-    if (!VAPID_KEY) {
-      return Promise.reject(new Error('Kunci VAPID belum dikonfigurasi di server.'));
-    }
-
     if (isIOS && !isStandalone) {
       return Promise.reject(new Error(
         'Di iPhone/iPad, notifikasi hanya bisa diaktifkan setelah aplikasi ditambahkan ke Home Screen.'
@@ -158,16 +175,43 @@
       .then(function (reg) {
         registration = reg;
 
-        return reg.pushManager.getSubscription().then(function (existing) {
-          if (existing) return existing;
+        return getVapidKey().then(function (key) {
+          var appServerKey = urlBase64ToUint8Array(key);
 
-          return reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+          return reg.pushManager.getSubscription().then(function (existing) {
+            if (existing) {
+              return saveSubscription(existing).catch(function () {
+                // Jika langganan lama tidak cocok dengan kunci server, unsubscribe lalu buat baru
+                return existing.unsubscribe().then(function () {
+                  return reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: appServerKey,
+                  }).then(saveSubscription);
+                });
+              });
+            }
+
+            return reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: appServerKey,
+            }).then(saveSubscription).catch(function (error) {
+              // Jika subscribe gagal karena push service error (misal conflict/stale internal subscription),
+              // coba getSubscription -> unsubscribe -> subscribe ulang sekali lagi.
+              return reg.pushManager.getSubscription().then(function (stale) {
+                if (stale) {
+                  return stale.unsubscribe().then(function () {
+                    return reg.pushManager.subscribe({
+                      userVisibleOnly: true,
+                      applicationServerKey: appServerKey,
+                    }).then(saveSubscription);
+                  });
+                }
+                throw error;
+              });
+            });
           });
         });
-      })
-      .then(saveSubscription);
+      });
   }
 
   function unsubscribe() {
