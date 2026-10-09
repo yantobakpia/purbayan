@@ -12,9 +12,15 @@ class MostBookedRoomsChart extends BaseWidget
 
     protected function getData(): array
     {
-        $rooms = Room::withCount(['bookings' => function ($query) {
-                $query->where('status', 'approved');
-            }])
+        Room::syncAllStatuses();
+
+        $rooms = Room::withCount([
+                'bookings',
+                'bookings as approved_bookings_count' => function ($query) {
+                    $query->whereIn('status', ['approved', 'selesai']);
+                },
+            ])
+            ->orderBy('approved_bookings_count', 'desc')
             ->orderBy('bookings_count', 'desc')
             ->limit(10)
             ->get();
@@ -22,13 +28,34 @@ class MostBookedRoomsChart extends BaseWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Jumlah Peminjaman (Disetujui)',
+                    'label' => 'Disetujui',
+                    'data' => $rooms->pluck('approved_bookings_count')->toArray(),
+                    'backgroundColor' => '#10b981',
+                    'borderColor' => '#059669',
+                ],
+                [
+                    'label' => 'Total Pengajuan',
                     'data' => $rooms->pluck('bookings_count')->toArray(),
-                    'backgroundColor' => '#3b82f6',
-                    'borderColor' => '#2563eb',
+                    'backgroundColor' => '#6366f1',
+                    'borderColor' => '#4f46e5',
                 ],
             ],
             'labels' => $rooms->pluck('name')->toArray(),
+        ];
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'precision' => 0,
+                        'stepSize' => 1,
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -37,3 +64,4 @@ class MostBookedRoomsChart extends BaseWidget
         return 'bar';
     }
 }
+

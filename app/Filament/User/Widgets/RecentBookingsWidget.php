@@ -40,11 +40,13 @@ class RecentBookingsWidget extends BaseWidget
                         'warning' => 'pending',
                         'success' => 'approved',
                         'danger'  => 'rejected',
+                        'info'    => 'selesai',
                     ])
                     ->formatStateUsing(fn($state) => match($state) {
                         'pending'  => 'Pending',
                         'approved' => 'Disetujui',
                         'rejected' => 'Ditolak',
+                        'selesai'  => 'Selesai',
                         default    => $state,
                     }),
             ]);

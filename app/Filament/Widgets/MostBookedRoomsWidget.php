@@ -15,12 +15,14 @@ class MostBookedRoomsWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
+        Room::syncAllStatuses();
+
         return $table
             ->query(
                 Room::query()
                     ->withCount('bookings')
                     ->withCount(['bookings as approved_bookings_count' => function ($query) {
-                        $query->where('status', 'approved');
+                        $query->whereIn('status', ['approved', 'selesai']);
                     }])
                     ->orderBy('approved_bookings_count', 'desc')
             )

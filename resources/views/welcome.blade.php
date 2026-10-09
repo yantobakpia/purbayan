@@ -625,7 +625,11 @@
                             <td>{{ $b->renter_name }}</td>
                             <td>{{ Str::limit($b->purpose, 45) }}</td>
                             <td>
-                                <span class="badge-status status-available" style="margin-bottom:0; font-size:0.75rem;">Disetujui</span>
+                                @if($b->status === 'selesai')
+                                    <span class="badge-status" style="margin-bottom:0; font-size:0.75rem; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">Selesai</span>
+                                @else
+                                    <span class="badge-status status-available" style="margin-bottom:0; font-size:0.75rem;">Disetujui</span>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

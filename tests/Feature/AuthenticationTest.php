@@ -97,4 +97,44 @@ class AuthenticationTest extends TestCase
             ->call('request')
             ->assertHasNoFormErrors(); // The form itself has no validation errors, but it returns early and doesn't change password
     }
+
+    public function test_login_creates_exactly_one_log_entry()
+    {
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('user'));
+
+        $user = User::factory()->create();
+
+        Livewire::test(Login::class)
+            ->fillForm([
+                'email' => $user->email,
+                'password' => 'password',
+            ])
+            ->call('authenticate');
+
+        $this->assertDatabaseCount('login_logs', 1);
+        $this->assertDatabaseHas('login_logs', [
+            'user_id' => $user->id,
+            'is_successful' => 1,
+        ]);
+    }
+
+    public function test_failed_login_creates_exactly_one_log_entry()
+    {
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('user'));
+
+        $user = User::factory()->create();
+
+        Livewire::test(Login::class)
+            ->fillForm([
+                'email' => $user->email,
+                'password' => 'wrongpassword',
+            ])
+            ->call('authenticate');
+
+        $this->assertDatabaseCount('login_logs', 1);
+        $this->assertDatabaseHas('login_logs', [
+            'email' => $user->email,
+            'is_successful' => 0,
+        ]);
+    }
 }

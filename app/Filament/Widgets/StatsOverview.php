@@ -14,7 +14,7 @@ class StatsOverview extends BaseWidget
     {
         Room::syncAllStatuses();
 
-        $rentedToday = Booking::where('status', 'approved')
+        $rentedToday = Booking::whereIn('status', ['approved', 'selesai'])
             ->whereDate('date', today())
             ->count();
 
@@ -22,18 +22,22 @@ class StatsOverview extends BaseWidget
         $pendingComplaints = Complaint::where('status', 'pending')->count();
         $totalRooms = Room::count();
 
-        $popularRoom = Room::withCount(['bookings' => function ($query) {
-                $query->where('status', 'approved');
+        $popularRoom = Room::withCount(['bookings as approved_bookings_count' => function ($query) {
+                $query->whereIn('status', ['approved', 'selesai']);
             }])
-            ->orderBy('bookings_count', 'desc')
+            ->orderBy('approved_bookings_count', 'desc')
             ->first();
 
-        $popularRoomName = $popularRoom ? $popularRoom->name : '-';
-        $popularRoomCount = $popularRoom ? $popularRoom->bookings_count : 0;
+        $hasApprovedBookings = $popularRoom && $popularRoom->approved_bookings_count > 0;
+        $popularRoomName = $hasApprovedBookings ? $popularRoom->name : '-';
+        $popularRoomCount = $popularRoom ? $popularRoom->approved_bookings_count : 0;
+        $popularRoomDescription = $hasApprovedBookings
+            ? "Sering dipinjam ({$popularRoomCount} kali disetujui)"
+            : 'Belum ada peminjaman disetujui';
 
         return [
             Stat::make('Ruangan Disewa Hari Ini', $rentedToday)
-                ->description('Peminjaman approved hari ini')
+                ->description('Peminjaman hari ini')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('success'),
             Stat::make('Peminjaman Menunggu', $pendingBookings)
@@ -45,7 +49,7 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-chat-bubble-left-ellipsis')
                 ->color('danger'),
             Stat::make('Ruangan Terpopuler', $popularRoomName)
-                ->description("Sering dipinjam ({$popularRoomCount} kali disetujui)")
+                ->description($popularRoomDescription)
                 ->descriptionIcon('heroicon-m-fire')
                 ->color('primary'),
         ];

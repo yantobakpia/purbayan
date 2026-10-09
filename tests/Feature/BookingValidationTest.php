@@ -26,6 +26,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
@@ -51,6 +52,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
@@ -90,6 +92,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
@@ -169,6 +172,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '09:00',
@@ -184,6 +188,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '10:00',
@@ -210,6 +215,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '10:15',
             'end_time' => '11:45',
@@ -235,6 +241,7 @@ class BookingValidationTest extends TestCase
             'user_id' => $user->id,
             'renter_name' => 'Existing',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '08:00',
             'end_time' => '09:00',
@@ -249,6 +256,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '08:30',
             'end_time' => '09:30',
@@ -262,6 +270,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '09:00',
             'end_time' => '10:00',
@@ -286,6 +295,7 @@ class BookingValidationTest extends TestCase
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
+            'department' => 'IT Support',
             'date' => today()->addDay()->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
@@ -370,21 +380,21 @@ class BookingValidationTest extends TestCase
 
         $file = \Illuminate\Http\UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
 
-        // Let's pick a Saturday (e.g. 2026-07-25 is a Saturday)
-        $startDate = '2026-07-25';
-        $endDate = '2026-08-15'; // 4 Saturdays: July 25, Aug 1, Aug 8, Aug 15
+        $startDate = today()->addWeek()->next(\Carbon\Carbon::SATURDAY);
+        $endDate = $startDate->copy()->addWeeks(3);
 
         $response = $this->actingAs($user)->post(route('book'), [
             'room_id' => $room->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
-            'date' => $startDate,
+            'department' => 'IT Support',
+            'date' => $startDate->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
             'purpose' => 'Weekly Saturday Meeting',
             'permit_letter' => $file,
             'is_recurring' => '1',
-            'end_date' => $endDate,
+            'end_date' => $endDate->format('Y-m-d'),
             'recurring_day' => '6', // Saturday
         ]);
 
@@ -395,10 +405,10 @@ class BookingValidationTest extends TestCase
         $this->assertDatabaseCount('bookings', 4);
         
         $bookings = Booking::orderBy('date')->get();
-        $this->assertEquals('2026-07-25', $bookings[0]->date->format('Y-m-d'));
-        $this->assertEquals('2026-08-01', $bookings[1]->date->format('Y-m-d'));
-        $this->assertEquals('2026-08-08', $bookings[2]->date->format('Y-m-d'));
-        $this->assertEquals('2026-08-15', $bookings[3]->date->format('Y-m-d'));
+        $this->assertEquals($startDate->format('Y-m-d'), $bookings[0]->date->format('Y-m-d'));
+        $this->assertEquals($startDate->copy()->addWeeks(1)->format('Y-m-d'), $bookings[1]->date->format('Y-m-d'));
+        $this->assertEquals($startDate->copy()->addWeeks(2)->format('Y-m-d'), $bookings[2]->date->format('Y-m-d'));
+        $this->assertEquals($startDate->copy()->addWeeks(3)->format('Y-m-d'), $bookings[3]->date->format('Y-m-d'));
     }
 
     public function test_approving_one_recurring_booking_approves_all_in_group()
@@ -411,13 +421,14 @@ class BookingValidationTest extends TestCase
 
         $token = 'rec_test_123';
 
-        // Create 3 pending bookings in the same recurring group
+        // Create 3 pending bookings in the same recurring group in the future
         $booking1 = Booking::create([
             'room_id' => $room->id,
             'user_id' => $user->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
-            'date' => '2026-07-25',
+            'department' => 'IT Support',
+            'date' => today()->addWeeks(1)->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
             'purpose' => 'Weekly Saturday Meeting',
@@ -430,7 +441,8 @@ class BookingValidationTest extends TestCase
             'user_id' => $user->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
-            'date' => '2026-08-01',
+            'department' => 'IT Support',
+            'date' => today()->addWeeks(2)->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
             'purpose' => 'Weekly Saturday Meeting',
@@ -443,7 +455,8 @@ class BookingValidationTest extends TestCase
             'user_id' => $user->id,
             'renter_name' => 'John Doe',
             'renter_phone' => '08123456789',
-            'date' => '2026-08-08',
+            'department' => 'IT Support',
+            'date' => today()->addWeeks(3)->format('Y-m-d'),
             'start_time' => '10:00',
             'end_time' => '11:00',
             'purpose' => 'Weekly Saturday Meeting',

@@ -13,7 +13,7 @@ class UserBookingsOverview extends BaseWidget
         $userId = auth()->id();
 
         $total = Booking::where('user_id', $userId)->count();
-        $approved = Booking::where('user_id', $userId)->where('status', 'approved')->count();
+        $approved = Booking::where('user_id', $userId)->whereIn('status', ['approved', 'selesai'])->count();
         $pending = Booking::where('user_id', $userId)->where('status', 'pending')->count();
         $rejected = Booking::where('user_id', $userId)->where('status', 'rejected')->count();
 

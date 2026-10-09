@@ -192,7 +192,7 @@ class Booking extends Model
 
         $existingBookings = static::where('room_id', $roomId)
             ->whereDate('date', $date)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'selesai'])
             ->where('id', '!=', $excludeId ?? 0)
             ->get();
 
