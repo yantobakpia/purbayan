@@ -98,6 +98,7 @@
         .catch(function (error) {
           toggleBtn.disabled = false;
           statusEl.textContent = error.message || 'Gagal mengubah pengaturan notifikasi.';
+          statusEl.textContent += ' Pastikan notifikasi diaktifkan di browser dan perangkat Anda.';
         });
     });
 
@@ -112,6 +113,7 @@
         })
         .catch(function (error) {
           statusEl.textContent = error.message || 'Gagal mengirim notifikasi percobaan.';
+          statusEl.textContent += ' Pastikan notifikasi diaktifkan di browser dan perangkat Anda.';
           scheduleStatusReset();
         })
         .finally(function () { testBtn.disabled = false; });
